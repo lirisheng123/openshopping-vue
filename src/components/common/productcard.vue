@@ -13,7 +13,11 @@
             <template slot="tags">
                 <p class="price" v-if="product.price!=null&&product.price!=''" >
                     ￥<span>{{product.price}}</span>
-                    <van-tag v-if="product.tags!=null" v-for="tag in product.tags" :key="tag" plain type="danger">{{tag}}</van-tag>
+                    <!-- 修改 -->
+                    <!-- <van-tag v-if="product.tags!=null" v-for="tag in product.tags" :key="tag" plain type="danger">{{tag}}</van-tag> -->
+                    <ul v-if="product.tags!=null">
+                    <van-tag  v-for="tag in product.tags" :key="tag" plain type="danger">{{tag}}</van-tag>
+                    </ul>
                 </p>
                 <van-stepper v-if="iscard" v-model="product.quantity" :max="product.max"  :min="product.min" />
             </template>

@@ -1,5 +1,4 @@
-import request from "../config/request";
-
+import request from "../utils/request";
 
 export function GetPage() {
     return request({

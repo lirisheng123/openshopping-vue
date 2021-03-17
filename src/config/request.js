@@ -2,8 +2,6 @@
 import axios from 'axios'
 import {baseUrl,dataSources} from './env';
 import datas from '../data/data';
-
-
 const service =axios.create({
   baseURL: baseUrl, // api 的 base_url
   timeout: 5000, // request timeout

@@ -18,7 +18,6 @@ export default {
     '/Page/Product':PageProduct,
     
 
-
     '/User/GetUserIndex':GetUserIndex,
     '/User/GetFavorite':GetFavorite,
     '/User/DelFavorite':success,
