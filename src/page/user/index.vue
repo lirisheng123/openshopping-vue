@@ -83,6 +83,7 @@
 
 <script>
 import { GetUserIndex } from "../../api/user.js";
+import { Message } from 'element-ui';
 
 export default {
   data(){
@@ -93,6 +94,8 @@ export default {
   components: {
   },
   created:function(){
+       Message.info("process.env.BASE_API:"+process.env.BASE_API)
+        Message.info("process.env.NODE_ENV:"+process.env.NODE_ENV)
       GetUserIndex().then(response=>{
           this.data=response;
       });

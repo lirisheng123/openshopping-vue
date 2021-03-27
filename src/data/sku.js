@@ -18,7 +18,7 @@ export default {
         ],
         k_s: 's1',
         count: 2
-      },
+      },  
       {
         k: '尺寸',
         k_id: '2',

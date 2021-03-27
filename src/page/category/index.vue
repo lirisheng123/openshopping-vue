@@ -9,12 +9,15 @@
         <div slot="action" @click="onSearch">搜索</div>
         </van-search>
         <van-badge-group :active-key="activeKey" class="tab" :style="'height:'+fullHeight+'px'">
-            <van-badge title="热门推荐" @click="onClick" />
-            <van-badge title="手机数码" @click="onClick" />
-            <van-badge title="家用电器" @click="onClick" />
-            <van-badge title="电脑办公" @click="onClick" />
-            <van-badge title="美妆护肤" @click="onClick" />
-            <van-badge title="个护清洁" @click="onClick" />
+           <div v-for="(item,index) in productCateOptions"  :key="index">
+                      <van-badge :title="item.label" @click="onClick(index,item)" />
+             </div>
+            <!-- <van-badge title="厨房小家电" @click="onClick(key,item)" />
+            <van-badge title="生活家电" @click="onClick(key,item)" />
+            <van-badge title="个护家电" @click="onClick(ikey,item)" />
+            <van-badge title="大家电" @click="onClick(key,item)" />
+            <van-badge title="厨房大电" @click="onClick(key,item)" /> -->
+            <!-- <van-badge title="个护清洁" @click="onClick" />
             <van-badge title="汽车用品" @click="onClick" />
             <van-badge title="男装" @click="onClick" />
             <van-badge title="男鞋" @click="onClick" />
@@ -23,29 +26,37 @@
             <van-badge title="母婴童装" @click="onClick" />
             <van-badge title="图书音像" @click="onClick" />
             <van-badge title="运动户外" @click="onClick" />
-            <van-badge title="食品生鲜" @click="onClick" />
+            <van-badge title="食品生鲜" @click="onClick" /> -->
         </van-badge-group>
         <div class="content" :style="'width:'+fullWidth+'px;height:'+(fullHeight-7)+'px'" >
             <img src="https://img11.360buyimg.com/mcoss/jfs/t1/1072/23/3672/95463/5b9a0813E175891fa/e38fc2f7c2ddfec2.jpg" />
             <div class="category-div">
-                <h4>常用分类</h4>
-                <ul >
+                <h4>分类</h4>
+                <ul v-for="(item,index) in cateChildList"  :key="index">
                     <li>
+                       <router-link  :to="{path:'/search?keyword=null&categoryId='+item.value}">
+                     
+                      <!-- <router-link to="/search?keyword=null&categoryId="> -->
+                        <img src="//img12.360buyimg.com/focus/jfs/t11824/150/2263801190/3392/8e69e1b3/5a167b8cNdcf71ae5.jpg">
+                        <span>{{item.label}}</span>
+                      </router-link>
+                    </li>
+                    <!-- <li>
                       <router-link to="/search?keyword=xxxx">
                         <img src="//img12.360buyimg.com/focus/jfs/t11824/150/2263801190/3392/8e69e1b3/5a167b8cNdcf71ae5.jpg">
                         <span>蓝牙耳机</span>
                       </router-link>
-                    </li>
-                    <li>
+                    </li> -->
+                    <!-- <li>
                         <a >
                             <img src="//img20.360buyimg.com/focus/jfs/t13759/194/897734755/2493/1305d4c4/5a1692ebN8ae73077.jpg">
                             <span>iPhone</span>
                         </a>
-                    </li>
+                    </li> -->
                     <div style="clear:both"></div>
                 </ul>
             </div>
-            <div class="category-div">
+            <!-- <div class="category-div">
                 <h4>热门分类</h4>
                 <ul>
                     <li><a ><img src="//img11.360buyimg.com/focus/s140x140_jfs/t21388/146/237407622/26923/221da1b3/5b054fedN2ba90518.jpg"><span>手机</span></a></li>
@@ -66,13 +77,17 @@
                     <div style="clear:both">
                     </div>
                 </ul>   
-            </div>
+            </div> -->
         </div>
         <navigate />
     </div>
 </template>
 
 <script>
+
+ import {fetchListWithChildren} from '@/api/productCate'
+ import {fetchList } from "@/api/product";
+  import { Message } from 'element-ui'
 import { Search } from "vant";
 
 export default {
@@ -85,16 +100,48 @@ export default {
       value: "",
       activeKey: 0,
       fullHeight: document.documentElement.clientHeight - 93,
-      fullWidth: document.documentElement.clientWidth - 99
+      fullWidth: document.documentElement.clientWidth - 99,
+      productCateOptions:[],
+      cateChildList:[]
     };
+  },
+  created() {
+      this.getProductCateList();
+      // this.getBrandList();
   },
   methods: {
     onSearch() {
-      console.log(this.value);
+
+       //跳转到list页面
+       
     },
-    onClick(key) {
+    onClick(key,item) {
       this.activeKey = key;
-    }
+      this.cateChildList= item.children;
+      console.log("cateChildList:"+this.cateChildList)
+    },
+    getProductCateList() {
+        fetchListWithChildren().then(response => {
+          let list = response.data;
+          this.productCateOptions = [];
+        
+          for (let i = 0; i < list.length; i++) {
+            let children = [];
+            if (list[i].children != null && list[i].children.length > 0) {
+              for (let j = 0; j < list[i].children.length; j++) {
+                children.push({label: list[i].children[j].categoryName, value: list[i].children[j].categoryId});
+              }
+            }
+            this.productCateOptions.push({label: list[i].categoryName, value: list[i].categoryId, children: children});
+
+          }
+
+          console.log("productCateOptions:"+JSON.stringify(this.productCateOptions) )
+          this.cateChildList=this.productCateOptions[0].children;
+          console.log("cateChildList:"+JSON.stringify( this.cateChildList) )
+
+        });
+    },
   }
 };
 </script>

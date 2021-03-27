@@ -7,19 +7,24 @@
  */
 
 let baseUrl = ''; 
+let BASE_API=""
 let routerMode = 'hash';
 let dataSources='local';//local=本地，其他值代表非本地
 
 
 if (process.env.NODE_ENV == 'development') {
-	baseUrl='';
+	// baseUrl='';
+	BASE_API= '"http://localhost:8084"'
 
 }else if(process.env.NODE_ENV == 'production'){
-	baseUrl = '';
+	BASE_API='"http://localhost:8084"'
 }
 
+// export {
+// 	baseUrl,
+// 	routerMode,
+// 	dataSources,
+// }
 export {
-	baseUrl,
-	routerMode,
-	dataSources,
+	BASE_API
 }

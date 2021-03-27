@@ -6,10 +6,12 @@ import { getToken } from '@/utils/auth'
 // 创建axios实例
 const service = axios.create({
   // api的base_url
-  baseURL: process.env.BASE_API, 
+  baseURL:  process.env.NODE_ENV === 'production' ? process.env.VUE_APP_REQUEST_URL : process.env.VUE_APP_BASE_API,
   // baseURL: "http://admin-api.macrozheng.com",
   timeout: 15000 // 请求超时时间
 })
+
+
 
 // request拦截器
 service.interceptors.request.use(config => {

@@ -1,6 +1,15 @@
 <template>
     <div class="product-list">
-        <searchtop/>
+        <!-- <searchtop @change"GetProducts"= /> -->
+       <van-search
+        v-model="value"
+        placeholder="请输入搜索关键词"
+        show-action
+        @search="onSearch"
+        >
+        <div slot="action" @click="onSearch">搜索</div>
+      </van-search>      
+  
         <div class="filterbar">
             <ul :class="filtersort?'show':''">
                 <li :class="filterindex==0?'selected':''" v-on:click="onFilterBar(0)"><span>{{filterindex==11?'价格最低':(filterindex==12?'价格最高':'综合')}}</span><van-icon name="arrow" class="down" /></li>
@@ -162,72 +171,85 @@
                 </div>
             </van-popup>
         </div>
-
         <div v-for="(product,i) in products" :key="i">
-          <product-card :product='product' @click="showProduct(product)" />
+           <div  @click="showProduct(product)">
+              <product-card :product='product' />
+           </div>
         </div>
     </div>
 </template>
 
 <script>
 import searchtop from "../../components/search/searchtop";
+import {fetchList } from "@/api/product";
+import { Search } from "vant";
 
 export default {
-  components: {
-    searchtop
-  },
+  // components: {
+  //   searchtop
+  // },
+   components:{
+        [Search.name]:Search,
+    },
   data() {
     return {
       value: "",
       filterindex: 0,
       filtersort: false,
       filtershow: false,
+      value:"",
+      products:[]
       
-            products:[
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'13.00',
-                },
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'499.00',
-                    tags:['满199减100','2件起购'],
-                },
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'499.00',
-                    tags:['新品'],
-                    imageTag:'仅剩1件',
-                },
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'499.00',
-                    tags:['赠'],
-                    imageTag:'预约',
-                },
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'15.00',
-                },
-                {
-                    id:1,
-                    imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                    title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
-                    price:'125.50',
-                },
-            ]
+            // products:[
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'13.00',
+            //     },
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'499.00',
+            //         tags:['满199减100','2件起购'],
+            //     },
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'499.00',
+            //         tags:['新品'],
+            //         imageTag:'仅剩1件',
+            //     },
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'499.00',
+            //         tags:['赠'],
+            //         imageTag:'预约',
+            //     },
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'15.00',
+            //     },
+            //     {
+            //         id:1,
+            //         imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+            //         title:'BEYOND博洋家纺 床上套件 秋冬保暖纯棉床单被套 双人被罩 磨毛全棉印花床品四件套',
+            //         price:'125.50',
+            //     },
+            // ]
     };
   },
+  created() {
+      console.log("进入search")
+      this.getSearchProductList();
+      // this.getAllRoleList();
+    },
   methods: {
     onFilterBar(value) {
       if (value == 0) {
@@ -239,9 +261,71 @@ export default {
         this.filterindex = value;
       }
     },
-    showProduct(product){
+    showProduct(product){ 
+      console.log("enter to the product detail")
         this.$router.push('/product/'+product.id);
-    }
+    },
+    getSearchProductList(){
+      let keyword=""
+      if(this.$route.query.keyword=='null'){
+        keyword=null
+      }else{
+        keyword=this.$route.query.keyword
+      }
+      let params={
+        goodsName:keyword,
+        goodsCategoryId:this.$route.query.categoryId,
+        pageNum:1,
+        pageSize:100,
+        goodsId:null,
+        goodsSellStatus:null
+      }
+       console.log("params:"+JSON.stringify(params) )
+       this.products=[]
+       fetchList(params).then(response => {
+            console.log("resp:"+JSON.stringify(response) )
+             let list=response.data.list;
+             for(let i=0;i< list.length;i++){
+               let product={
+                 id: list[i].goodsId,
+                //  imageURL: list[i].goodsCoverImg,
+                imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+                 title: list[i].goodsName,
+                 price: list[i].sellingPrice
+               }
+               this.products.push(product)
+             }
+       })
+
+    },
+    onSearch() {
+       let params={
+        goodsName:this.value,
+        goodsCategoryId:null,
+        pageNum:1,
+        pageSize:100,
+        goodsId:null,
+        goodsSellStatus:null
+      }
+       console.log("params:"+JSON.stringify(params) )
+       this.products=[]
+       fetchList(params).then(response => {
+            console.log("resp:"+JSON.stringify(response) )
+             let list=response.data.list;
+             for(let i=0;i< list.length;i++){
+               let product={
+                 id: list[i].goodsId,
+                //  imageURL: list[i].goodsCoverImg,
+                imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+                 title: list[i].goodsName,
+                 price: list[i].sellingPrice
+               }
+               this.products.push(product)
+             }
+       })
+
+    },
+
   }
 };
 </script>

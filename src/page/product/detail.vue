@@ -165,36 +165,46 @@
 
 <script>
 import skuData from '../../data/sku';
-
+  import {fetchList as fetchSkuStockList,update as updateSkuStockList} from '@/api/skuStock'
+  import {fetchList as fetchProductAttrList} from '@/api/goodPropertyRelate'
+    import {getProduct as fetchProductList} from '@/api/product' 
+    import {createShoppingCart} from "@/api/shoppingCart"
 export default {
   components: {
   },
   data() {
-    this.skuData = skuData;
+    // this.skuData = skuData;
+    // this.skuData ={};
     return {
+      skuData:{},
       show:false,
       showTag:false,
-      goods: {
-        title: '【每日一粒益智又长高】 Lifeline Care 儿童果冻鱼油DHA维生素D3聪明长高 软糖 30粒 2件装',
-        subtitle:'【品牌直采】Q弹美味，无腥味果冻鱼油，每粒含足量鱼油DHA，帮助视网膜和大脑健康发育，让你的宝宝明眼又聪明，同时补充400国际单位维生素D3，强壮骨骼和牙齿。特含DPA，让宝宝免疫力更强，没病来扰。',
-        price: 2680,
-        market_price:9999,
-        express: '免运费',
-        remain: 19,
-        thumb: [
-          'https://img.yzcdn.cn/public_files/2017/10/24/e5a5a02309a41f9f5def56684808d9ae.jpeg',
-          'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
-        ],
-        info:'<p style="text-align:center;"><img src="https://haitao.nosdn2.127.net/ac19460151ee4d95a6657202bcfc653c1531470912089jjjq8ml410763.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/2a91cfad22404e5498d347672b1440301531470912182jjjq8mnq10764.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/caddd5a213de4c1cb1347c267e8275731531470912412jjjq8mu410765.jpg" ></p>',
-      },
+      goods:{},
+      // goods: {
+      //   title: '【每日一粒益智又长高】 Lifeline Care 儿童果冻鱼油DHA维生素D3聪明长高 软糖 30粒 2件装',
+      //   subtitle:'【品牌直采】Q弹美味，无腥味果冻鱼油，每粒含足量鱼油DHA，帮助视网膜和大脑健康发育，让你的宝宝明眼又聪明，同时补充400国际单位维生素D3，强壮骨骼和牙齿。特含DPA，让宝宝免疫力更强，没病来扰。',
+      //   price: 2680,
+      //   market_price:9999,
+      //   express: '免运费',
+      //   remain: 19,
+      //   thumb: [
+      //     'https://img.yzcdn.cn/public_files/2017/10/24/e5a5a02309a41f9f5def56684808d9ae.jpeg',
+      //     'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
+      //   ],
+      //   info:'<p style="text-align:center;"><img src="https://haitao.nosdn2.127.net/ac19460151ee4d95a6657202bcfc653c1531470912089jjjq8ml410763.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/2a91cfad22404e5498d347672b1440301531470912182jjjq8mnq10764.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/caddd5a213de4c1cb1347c267e8275731531470912412jjjq8mu410765.jpg" ></p>',
+      // },
       showBase: false,
       showCustom: false,
       showStepper: false,
       closeOnClickOverlay: true,
-      initialSku: {
-        s1: '30349',
-        s2: '1193'
-      },
+      initialSku: {},
+      // initialSku: {
+      //   s1: '30349',
+      //   s2: '1193'
+      // },
+      goodPropertyRelate:[],
+      goodProperty:[],
+      product:{},
       customSkuValidator: (component) => {
         return '请选择xxx';
       },
@@ -224,12 +234,16 @@ export default {
       }
     };
   },
+  created(){
+    this.getProductDetail();
+    // this.getSkuData();
+  },
   methods: {
     formatPrice(data) {
       return '¥' + (data / 100).toFixed(2);
     },
-    onClickCart() {
-      this.$router.push('/cart');
+    onClickCart() {     
+     this.$router.push('/cart');
     },
     sorry() {
       Toast('暂无后续逻辑~');
@@ -248,9 +262,198 @@ export default {
     },
     onAddCartClicked(data) {
       this.$toast(JSON.stringify(data));
+      console.log("data:"+JSON.stringify(data))
+      let params={
+         "goodsCount": 3,
+         "goodsCoverImg": "",
+         "goodsInfo": "[{\"key\":\"容量\",\"value\":\"1L\"}]",
+         "goodsName": "热卖电饭锅",
+         "goodsPrice": 200,
+         "goodsPropertyId": 1,
+         "userId": 4
+      }
+      // createShoppingCart(params).then(resp=>{
+      //      if(resp.code==200){
+      //       //  this.$router.push('/cart');
+      //       this.$toast("加入购物车成功")
+      //      }
+      //      else{
+      //        this.$toast("加入购物车失败");
+      //      }
+      // })
     },
+    getProductDetail(){
+       //获取goodId ,根据路由获得
+       let goodsId=this.$route.params.id
+       fetchProductList(goodsId).then(resp=>{
+          //构造 goods,skuData
+          this.product = resp.data;
+          this.goods={
+              title: this.product.goodsName,
+              price: this.product.sellingPrice,
+              market_price:999,
+              express: '免运费',
+              remain: 19,
+              thumb: [
+                'https://img.yzcdn.cn/public_files/2017/10/24/e5a5a02309a41f9f5def56684808d9ae.jpeg',
+                'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
+              ],
+              info:'<p style="text-align:center;"><img src="https://haitao.nosdn2.127.net/ac19460151ee4d95a6657202bcfc653c1531470912089jjjq8ml410763.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/2a91cfad22404e5498d347672b1440301531470912182jjjq8mnq10764.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/caddd5a213de4c1cb1347c267e8275731531470912412jjjq8mu410765.jpg" ></p>',
+          }
+          console.log("goods:"+JSON.stringify(this.goods))
+          
+          fetchSkuStockList(goodsId,{keyword:""}).then(response=>{
+              this.goodProperty=response.data;
+              console.log("goodProperty:"+JSON.stringify(this.goodProperty))
 
+               fetchProductAttrList(goodsId,{type:0}).then(response=>{
+                this.goodPropertyRelate=response.data;
+                console.log("goodPropertyRelate:"+JSON.stringify(this.goodPropertyRelate))
+                  this.getSkuData();
+               });
+          });
+
+        
+
+       })
+      
+     
+     
+        
+    },
+    getSkuData(){
+      console.log("enter sku data")
+      let tree=this.getTree(this.goodPropertyRelate);
+
+      let list=this.getPropertyList(this.goodProperty,tree);
+      let sku= {
+        tree: tree,
+        list: list,
+        price: this.product.sellingPrice,
+        market_price:'10.00',
+        stock_num: 227,
+        collection_id: 2261,
+        collection_price: 0,
+        none_sku: false,
+        sold_num: 0,
+        min_price: '1.00',
+        max_price: '1.00',
+        messages: [
+        ],
+        hide_stock: false
+      }
+      console.log("sku:"+JSON.stringify(sku))
+      this.skuData={
+        kdt_id: 55,
+        user_id: 4674509,
+        offline_id: 0,
+        activity_alias: '',
+        sku: sku,
+        goods_id: '946755',
+        alias: '2oml0r0n5vytj',
+        quota: 15,
+        is_virtual: '0',
+        quota_used: 0,
+        goods_info: {
+          title: '测试商品',
+          picture:
+            'https://img.yzcdn.cn/upload_files/2017/03/16/Fs_OMbSFPa183sBwvG_94llUYiLa.jpeg?imageView2/2/w/100/h/100/q/75/format/jpg',
+          price: 1,
+          origin: ''
+        }
+      }
+      console.log("skuData:"+JSON.stringify(this.skuData))
+    },
+    getTree(list){
+    let tree=[]
+     console.log("tree list:"+JSON.stringify(list))
+    for(let i=0;i<list.length;i++){
+      let values=this.getPropertyRelateValue(list[i].goodsPropertyRelateValue)
+      let single={
+          k: list[i].goodsPropertyRelateName,
+          k_id: i,
+          v: values,
+          k_s: 's'+(i+1),
+          count: list.length
+      }
+      tree.push(single)
+    }
+    console.log("tree:"+JSON.stringify(tree))
+    return tree
+    
+    },
+    getPropertyRelateValue(list){
+    let  values=[];
+    list = list.split(",")
+    for(let i=0;i<list.length;i++){
+      let value={
+        id: i,
+        name: list[i],
+        imgUrl:
+        'https://img.yzcdn.cn/upload_files/2017/02/21/FjKTOxjVgnUuPmHJRdunvYky9OHP.jpg!100x100.jpg'
+      }
+      values.push(value)
+    }
+    console.log("relateValue:"+values)
+    return values;
+    },
+    getPropertyList(propertys,tree){
+      let list=[]
+      for(let i=0;i<propertys.length;i++){
+        //value为商品属性的值,例如{"容量":1L,"颜色":红色}
+        // let values = propertys[i].goodsPropertyValue
+        let s1
+        let s2
+        if(tree.length==2){
+             s1 = this.getValueBySn(propertys[i].goodsPropertyValue,tree[0])
+             s2 =this.getValueBySn(propertys[i].goodsPropertyValue,tree[1])
+        }else{
+            s1=this.getValueBySn(propertys[i].goodsPropertyValue,tree[0])
+            s2='0'
+        }
+        let single={
+          id: propertys[i].goodsPropertyId,
+          price: propertys[i].sellingPrice,
+          discount: 100,
+          code: '',
+          s1: s1,
+          s2: s2,
+          extend: null,
+          kdt_id: 55,
+          discount_price: 0,
+          stock_num: propertys[i].stockNum,
+          stock_mode: 0,
+          is_sell: null,
+          combin_sku: false,
+          goods_id: propertys[i].goodsId
+        }
+        list.push(single)
+      }
+      console.log("list:"+list)
+      return list;  
+
+
+    },
+    getValueBySn(propertyValue,tree){
+      propertyValue =JSON.parse(propertyValue)
+      console.log("ValueBySn propertyValue:"+JSON.stringify(propertyValue))
+       console.log("ValueBySn tree:"+JSON.stringify(tree))
+      for(let i=0;i< propertyValue.length;i++){
+        console.log("ValueBySn key:"+propertyValue[i].key)
+        if(propertyValue[i].key==tree.k){
+          let v = tree.v;
+          for(let j=0;j<v.length;j++){
+              if(v[j].name==propertyValue[i].value){
+                console.log("ssssssssssss:"+v[j].id)
+                return   v[j].id;
+              }
+          }
+        }
+      }
+
+    }
   }
+ 
 };
 </script>
 

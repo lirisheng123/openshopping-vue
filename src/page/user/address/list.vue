@@ -17,6 +17,11 @@
 
 import { GetAddressList } from "../../../api/user.js";
 import { AddressList } from 'vant';
+
+import { fetchList ,deleteAdress,selectedConfired} from "@/api/userAdress";
+
+
+
 export default {
     components:{
         [AddressList.name]:AddressList,
@@ -46,11 +51,26 @@ export default {
         }
     },
     created:function(){
-        this.chosenAddressId=this.$route.query.id;
-        this.isSelect=this.$route.query.id>0;
-        GetAddressList().then(response=>{
-            this.list=response;
+        // this.chosenAddressId=this.$route.query.id;
+        // this.isSelect=this.$route.query.id>0;
+        fetchList().then(response=>{
+            let data=response.data;
+            for(let i=0;i<data.length;i++){
+                let value={
+                    "id": data[i].addressId,
+                    "name": data[i].userName,
+                    "tel": data[i].userPhone,
+                    "address": data[i].detailAddress
+                }
+                this.list.push(value)
+                if(data[i].defaultFlag==1){
+                    this.chosenAddressId=data[i].addressId;
+                    this.isSelect=true; 
+                }
+            }
+            
         })
+
     }
 
 }

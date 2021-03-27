@@ -27,9 +27,9 @@
         </div>
         </div>
     
-      <div class="promotion-group">
+      <!-- <div class="promotion-group">
         
-       <van-cell  is-link class="head">
+        <van-cell  is-link class="head">
         <template slot="title">
           <van-checkbox v-model="checkedAll" >京东自营</van-checkbox>
         </template>
@@ -50,12 +50,12 @@
             </van-cell>
           </template>
         </product-card>
-      </div>
-      <van-cell value="去凑单" is-link class="promotion">
+      </div> 
+       <van-cell value="去凑单" is-link class="promotion">
         <template slot="title">
           <p><van-tag type="danger">满减</van-tag>购满60元，可减5元</p>
         </template>
-      </van-cell>
+      </van-cell> 
       <div  v-for="(item,index) in goods"
         :key="index+20" class="card-goods__item"> 
         <van-checkbox :name="item.id"></van-checkbox>
@@ -71,7 +71,7 @@
           </template>
         </product-card>
       </div>
-        </div>
+        </div> -->
     </van-checkbox-group>
     
     <div style="height:50px;"></div>
@@ -89,7 +89,8 @@
 </template>
 
 <script>
-
+import {fetchShopList,deleteShoppingCart,clearShopCart} from "@/api/shoppingCart"
+import user from '../../store/modules/user';
 export default {
   components: {
   },
@@ -97,40 +98,44 @@ export default {
     return {
       checkedAll:true,
       checkedGoods: ['1', '2', '3'],
-      goods: [{
-        id: '1',
-        title: '星巴克(Starbucks)星冰乐 轻盈香草味 咖啡饮料 281ml*6瓶礼盒装低脂减糖',
-        desc: '3.18kg/件',
-        price: '200.00',
-        quantity: 1,
-        imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/2f9a36046449dafb8608e99990b3c205.jpeg',
-        imageTag:'比加入时降5元',
-      }, {
-        id: '2',
-        title: '陕西蜜梨',
-        desc: '约600g',
-        price: '690.00',
-        quantity: 1,
-        imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/f6aabd6ac5521195e01e8e89ee9fc63f.jpeg',
-          gift: [
-            {
-              title: "星巴克（Starbucks）星冰乐小熊吊饰星巴克（Starbucks）星冰乐小熊吊饰",
-              quantity: 2
-            },
-            {
-              title: "星巴克（Starbucks）星冰乐小熊吊饰星巴克（Starbucks）星冰乐小熊吊饰",
-              quantity: 1
-            }
-          ]
-      }, {
-        id: '3',
-        title: '美国伽力果',
-        desc: '约680g/3个',
-        price: '2680.00',
-        quantity: 1,
-        imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/320454216bbe9e25c7651e1fa51b31fd.jpeg'
-      }]
+      goods:[]
+      // goods: [{
+      //   id: '1',
+      //   title: '星巴克(Starbucks)星冰乐 轻盈香草味 咖啡饮料 281ml*6瓶礼盒装低脂减糖',
+      //   desc: '3.18kg/件',
+      //   price: '200.00',
+      //   quantity: 1,
+      //   imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/2f9a36046449dafb8608e99990b3c205.jpeg',
+      //   imageTag:'比加入时降5元',
+      // }, {
+      //   id: '2',
+      //   title: '陕西蜜梨',
+      //   desc: '约600g',
+      //   price: '690.00',
+      //   quantity: 1,
+      //   imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/f6aabd6ac5521195e01e8e89ee9fc63f.jpeg',
+      //     gift: [
+      //       {
+      //         title: "星巴克（Starbucks）星冰乐小熊吊饰星巴克（Starbucks）星冰乐小熊吊饰",
+      //         quantity: 2
+      //       },
+      //       {
+      //         title: "星巴克（Starbucks）星冰乐小熊吊饰星巴克（Starbucks）星冰乐小熊吊饰",
+      //         quantity: 1
+      //       }
+      //     ]
+      // }, {
+      //   id: '3',
+      //   title: '美国伽力果',
+      //   desc: '约680g/3个',
+      //   price: '2680.00',
+      //   quantity: 1,
+      //   imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/320454216bbe9e25c7651e1fa51b31fd.jpeg'
+      // }]
     };
+  },
+  created(){
+     this.getShopCartList()
   },
   computed: {
     submitBarText() {
@@ -145,6 +150,25 @@ export default {
     onSubmit() {
       
       this.$router.push('/order')
+    },
+    getShopCartList(){
+        //暂时默认为4,等与权限集成的时候,在进行改变
+       let userId=4
+       fetchShopList(userId).then(resp=>{
+          this.data= resp.data;
+          for(let i=0;i<data.length;i++){
+            let value={
+                id: data[i].cartItemId,
+                title:  data[i].goodsName,
+                desc: data[i].cartItemId,
+                price: data[i].goodsPrice,
+                quantity:data[i].goodsCount,
+                imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/2f9a36046449dafb8608e99990b3c205.jpeg',
+                imageTag:'比加入时降5元',
+            }
+            this.goods.push(value)
+          }
+       })
     }
   }
 };

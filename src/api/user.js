@@ -1,9 +1,9 @@
-import request from "../config/request";
+import request from "../utils/request";
 
 
 export function GetUserIndex() {
   return request({
-    url: '/User/GetUserIndex',
+    url: '/user/list',
     method: 'get',
   })
 }

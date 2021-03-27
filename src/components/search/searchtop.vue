@@ -15,7 +15,6 @@
             </van-search>
         </van-nav-bar>
         
-
     </div>
 </template>
 
@@ -34,7 +33,8 @@ export default {
     },
     methods:{
         onSearch() {
-            console.log(this.value);
+            // console.log(this.value);
+            this.$router.push({path: '/search', query: {keyword: this.value,categoryId:null}})
         },
         onBack() {
             history.back();

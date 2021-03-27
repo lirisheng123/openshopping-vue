@@ -169,7 +169,7 @@ export default {
   },
   methods: {
         onLoad() {
-            this.page++;
+            this.page=this.page + 1;
             GetCoupon({page:this.page}).then(response=>{
                 response.List.forEach(item => {
                     item.show=false;
