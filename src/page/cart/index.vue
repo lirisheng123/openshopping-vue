@@ -27,13 +27,13 @@
         </div>
         </div>
     
-      <!-- <div class="promotion-group">
+       <!-- <div class="promotion-group">
         
         <van-cell  is-link class="head">
         <template slot="title">
           <van-checkbox v-model="checkedAll" >京东自营</van-checkbox>
         </template>
-      </van-cell>
+      </van-cell> 
       
       
       <div  v-for="(item,index) in goods"
@@ -71,7 +71,7 @@
           </template>
         </product-card>
       </div>
-        </div> -->
+        </div>  -->
     </van-checkbox-group>
     
     <div style="height:50px;"></div>
@@ -81,10 +81,10 @@
       :button-text="submitBarText"
       @submit="onSubmit"
     >
-    <template slot>
+     <!-- <template slot>
       <van-checkbox v-model="checkedAll" >全选</van-checkbox>
-    </template>
-    </van-submit-bar>
+    </template> -->
+    </van-submit-bar> 
   </div>
 </template>
 
@@ -97,7 +97,8 @@ export default {
   data() {
     return {
       checkedAll:true,
-      checkedGoods: ['1', '2', '3'],
+      // checkedGoods: ['1', '2', '3'],
+      checkedGoods: [],
       goods:[]
       // goods: [{
       //   id: '1',
@@ -143,24 +144,33 @@ export default {
       return '结算' + (count ? `(${count})` : '');
     },
     totalPrice() {
-      return this.goods.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? parseFloat(item.price): 0), 0);
+      return this.goods.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? parseFloat(item.price)*(item.quantity)*100: 0), 0);
     },
   },
   methods: {
     onSubmit() {
       
-      this.$router.push('/order')
+      let cateIds=[]
+      
+       for(let i=0;i<this.goods.length;i++){
+          if(this.checkedGoods.indexOf(this.goods[i].id) !== -1){
+              cateIds.push(this.goods[i].id);
+          }
+       }
+       console.log("cateIds:"+JSON.stringify(cateIds))
+
+      this.$router.push({path: '/order', query: {cateIds: cateIds}})
     },
     getShopCartList(){
         //暂时默认为4,等与权限集成的时候,在进行改变
        let userId=4
        fetchShopList(userId).then(resp=>{
-          this.data= resp.data;
+          let data= resp.data;
           for(let i=0;i<data.length;i++){
             let value={
                 id: data[i].cartItemId,
                 title:  data[i].goodsName,
-                desc: data[i].cartItemId,
+                desc: data[i].goodsInfo,
                 price: data[i].goodsPrice,
                 quantity:data[i].goodsCount,
                 imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/2f9a36046449dafb8608e99990b3c205.jpeg',

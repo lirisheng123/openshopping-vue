@@ -1,4 +1,4 @@
-export default {
+export default{
   kdt_id: 55,
   user_id: 4674509,
   offline_id: 0,

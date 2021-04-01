@@ -38,6 +38,7 @@ import imageAd from "../../components/page/imageAd.vue";
 import imageText from "../../components/page/imageText.vue";
 import product from "../../components/page/product.vue";
 import { GetPage } from "../../api/page.js";
+import  pageData  from "@/data/page.js";
 
 export default {
     name:"page",
@@ -53,21 +54,26 @@ export default {
         imageText,
         product
     },
-    data:function(){
+    data(){
+       
         return{
             topheight:0,
             page:{},
+            pageData
         }
     },
-    created:function(){
-        GetPage().then(response=>{
-            this.page=response;
-        });
+    created(){
+        console.log("enter created:")
+        this.page = this.pageData
+        console.log("pageData:"+JSON.stringify( this.page))
+        // GetPage().then(response=>{
+        //     this.page=response;
+        // });
     },
     methods:{
         settopheight:function(value){
             this.topheight=value;
         }
     }
-}
+};
 </script>

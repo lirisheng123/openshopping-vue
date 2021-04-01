@@ -138,6 +138,7 @@
 
 <script>
 import { GetCoupon,ExchangeCoupon } from "../../../api/user.js";
+import { fetchList,fetchAvailabelList ,getCoupon} from "@/api/coupon";
 
 export default {
   components: {
@@ -170,16 +171,45 @@ export default {
   methods: {
         onLoad() {
             this.page=this.page + 1;
-            GetCoupon({page:this.page}).then(response=>{
-                response.List.forEach(item => {
-                    item.show=false;
-                    this.list.push(item);
-                });
-                this.loading = false;
-                if(response.TotalPage<=this.page){
-                    this.finished = true;
-                }
+            // GetCoupon({page:this.page}).then(response=>{
+            //     response.List.forEach(item => {
+            //         item.show=false;
+            //         this.list.push(item);
+            //     });
+            //     this.loading = false;
+            //     if(response.TotalPage<=this.page){
+            //         this.finished = true;
+            //     }
             
+            // })
+            let params={
+                pageNum:this.page,
+                pageSize:5,
+                useStatus:0
+            }
+            let userId=4;
+            fetchList(userId,params).then(resp=>{
+                let data = resp.data.list;
+                this.list=[]
+                for(let i=0;i<data.length;i++){
+                    let value={
+                        "Id":data[i].couponHistoryId,
+                        "Name":data[i].name,
+                        "BeginDate":data[i].startTime,
+                        "EndDate":data[i].endTime,
+                        "Condition":"满"+data[i].minPoint+"可用",
+                        "SignPosition":"right",
+                        "Coupon":data[i].amount,
+                        "Sign":"￥",
+                        "Info":data[i].note,
+                        "show":false
+                    }
+                    this.list.push(value)
+                }
+                this.loading=false
+                if( resp.data.totalPage<=this.page){
+                     this.finished = true;
+                }
             })
         },
         onShowInfo(id,index){
@@ -192,28 +222,84 @@ export default {
         },
         onLoadUse() {
             this.usePage++;
-            GetCoupon({page:this.usePage}).then(response=>{
-                response.List.forEach(item => {
-                    this.useList.push(item);
-                });
-                this.useLoading = false;
-                if(response.TotalPage<=this.usePage){
-                    this.useFinished = true;
-                }
+            // GetCoupon({page:this.usePage}).then(response=>{
+            //     response.List.forEach(item => {
+            //         this.useList.push(item);
+            //     });
+            //     this.useLoading = false;
+            //     if(response.TotalPage<=this.usePage){
+            //         this.useFinished = true;
+            //     }
             
+            // })
+             let params={
+                pageNum:this.usePage,
+                pageSize:5,
+                useStatus:1
+            }
+            let userId=4;
+            fetchList(userId,params).then(resp=>{
+                let data = resp.data.list;
+                this.useList=[]
+                for(let i=0;i<data.length;i++){
+                    let value={
+                        "Id":data[i].couponHistoryId,
+                        "Name":data[i].name,
+                        "BeginDate":data[i].startTime,
+                        "EndDate":data[i].endTime,
+                        "Condition":"满"+data[i].minPoint+"可用",
+                        "SignPosition":"right",
+                        "Coupon":data[i].amount,
+                        "Sign":"￥",
+                        "Info":data[i].note
+                    }
+                    this.useList.push(value)
+                }
+                 this.useLoading = false;
+                if( resp.data.totalPage<=this.page){
+                     this.useFinished = true;
+                }
             })
         },
         onLoadEnd() {
             this.endPage++;
-            GetCoupon({page:this.endPage}).then(response=>{
-                response.List.forEach(item => {
-                    this.endList.push(item);
-                });
-                this.endLoading = false;
-                if(response.TotalPage<=this.endPage){
-                    this.endFinished = true;
-                }
+            // GetCoupon({page:this.endPage}).then(response=>{
+            //     response.List.forEach(item => {
+            //         this.endList.push(item);
+            //     });
+            //     this.endLoading = false;
+            //     if(response.TotalPage<=this.endPage){
+            //         this.endFinished = true;
+            //     }
             
+            // })
+               let params={
+                pageNum:this.endPage,
+                pageSize:5,
+                useStatus:2
+            }
+            let userId=4;
+            fetchList(userId,params).then(resp=>{
+                let data = resp.data.list;
+                this.endList=[]
+                for(let i=0;i<data.length;i++){
+                    let value={
+                        "Id":data[i].couponHistoryId,
+                        "Name":data[i].name,
+                        "BeginDate":data[i].startTime,
+                        "EndDate":data[i].endTime,
+                        "Condition":"满"+data[i].minPoint+"可用",
+                        "SignPosition":"right",
+                        "Coupon":data[i].amount,
+                        "Sign":"￥",
+                        "Info":data[i].note
+                    }
+                    this.endList.push(value)
+                }
+                 this.endLoading = false;
+                if( resp.data.totalPage<=this.page){
+                     this.endFinished = true;
+                }
             })
         },
         onExchange(){

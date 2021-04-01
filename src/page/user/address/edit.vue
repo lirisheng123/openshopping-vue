@@ -33,21 +33,40 @@ export default {
 
   methods: {
     onSave(data) {
-      let param={
-       	"cityName": "东莞市",
-        "detailAddress": "广东省东莞市松山湖管委会大学路1号东莞理工学院",
-        "provinceName": "广东省",
-        "regionName": "松山湖管委会",
-        "userId": 4,
-        "userName": data.name,
-        "userPhone": data.name
-
-      }
       console.log("data:"+JSON.stringify(data))
-      // create(data).then(response=>{
-      //   this.$toast('保存成功');
-      //   this.$router.go(-1);
-      // })
+      let userId=4;
+      let defautFlag= data.isDefault?1:0
+      let param={
+        "addressId":data.id,
+       	"cityName": data.city,
+        "detailAddress": data.addressDetail,
+        "provinceName": data.province,
+        "regionName": data.county,
+        "userId": userId,
+        "userName": data.name,
+        "userPhone": data.tel,
+        "defaultFlag":defautFlag,
+        "areaCode":data.areaCode
+         
+      }
+      var id=this.$route.query.id;
+      if(id>0){
+        //编辑
+        update(data.id,param).then(resp=>{
+          
+           this.$toast('保存成功');
+           this.$router.go(-1);
+        })
+      }
+      else{
+        //添加
+        
+        create(param).then(response=>{
+        this.$toast('保存成功');
+        this.$router.go(-1);
+        })
+      }
+    
     },
     onDelete(data) {
       deleteAdress(data.id).then(response=>{
@@ -71,9 +90,13 @@ export default {
             "id": data.addressId,
             "name": data.userName,
             "tel": data.userPhone,
-            "areaCode": "712899",
+            "areaCode": data.areaCode,
             "addressDetail": data.detailAddress,
-            "isDefault": flag
+            "isDefault": flag,
+            "city": data.cityName,
+            "province": data.provinceName,
+            "county": data.regionName
+           
         }
     
       })

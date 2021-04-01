@@ -22,7 +22,7 @@ export function update(id,params) {
     return request({
       url:'/userAddress/update/'+id,
       method:'post',
-      params:params
+      data:params
     })
 }
 
@@ -31,7 +31,7 @@ export function create(params) {
     return request({
       url:'/userAddress/add',
       method:'post',
-      params:params
+      data: params
     })
 }
 

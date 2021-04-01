@@ -53,7 +53,8 @@ export default {
     created:function(){
         // this.chosenAddressId=this.$route.query.id;
         // this.isSelect=this.$route.query.id>0;
-        fetchList().then(response=>{
+        let userId =4
+        fetchList(userId).then(response=>{
             let data=response.data;
             for(let i=0;i<data.length;i++){
                 let value={
@@ -61,6 +62,12 @@ export default {
                     "name": data[i].userName,
                     "tel": data[i].userPhone,
                     "address": data[i].detailAddress
+                    // "addressDetail": data[i].detailAddress,
+                    // "city": data[i].cityName,
+                    // "province": data[i].provinceName,
+                    // "county": data[i].regionName,
+                    // "isDefault": data[i].defaultFlag,
+
                 }
                 this.list.push(value)
                 if(data[i].defaultFlag==1){

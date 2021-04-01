@@ -26,13 +26,15 @@
 </template>
 
 <script>
-import {getProduct} from "../../api/page.js";
+// import {getProduct} from "../../api/page.js";
+import  getProduct  from "@/data/product.js";
 
 export default {
     name:'product',
     data () {
        return {
-           productlist: []
+           productlist: [],
+           getProduct
        }
      },
     props:{
@@ -70,7 +72,8 @@ export default {
         data.classname=classname;
         data.aclass=aclass;
         getProduct(id).then(response => {
-            this.productlist=response;
+            // this.productlist=response;
+            this.productlist=this.getProduct
         })
     }
 }

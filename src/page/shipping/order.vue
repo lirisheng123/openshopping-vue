@@ -37,10 +37,10 @@
     
     <div style="height:15px;"></div>
     <van-cell-group class="total">
-        <van-cell title="商品总额" value="9.99" />
-        <van-cell title="运费" value="+ 0.00" />
-        <van-cell title="折扣" value="- 5.00" />
-        <van-cell title="实付金额" value="4.99" style="font-weight: 700;" />
+        <van-cell title="商品总额" :value="confirmOrder.totalAmount" />
+        <van-cell title="运费" :value="confirmOrder.freightAmount" />
+        <van-cell title="折扣" :value="confirmOrder.couponAmount" />
+        <van-cell title="实付金额" :value="confirmOrder.payAmount" style="font-weight: 700;" />
     </van-cell-group>
 
     <div style="height:50px;"></div>
@@ -54,11 +54,30 @@
   </div>
 </template>
 
+
+
 <script>
+import {generateConfirmOrder,generateOrder} from "@/api/order"
+const defaultComfiredOrder={
+  userId:null,
+  totalAmount:null,
+  payStatus:null,
+  payType:"手机",
+  payTime:null,
+  extraInfo:null,
+  orderStatus:null,
+  payAmount:null,
+  freightAmount:null,
+  couponAmount:null,
+  shopCateIds:null,
+  orderAddressId:null,
+  mallOrderItems:null
+}
 export default {
   data() {
     return {
       type: "add1",
+      confirmOrder:{},
       products: [
         {
           imageURL:
@@ -97,18 +116,66 @@ export default {
       ]
     };
   },
+  created(){
+    //根据路由过来的origin判断来源,购物车,还是商业详情页面,秒杀页面
+    this.generateConfirmFormCart();
+
+  },
   methods: {
     onSubmit() {
+      //根据普通的订单还是秒杀订单
+      //目前测试暂时预设环境: 购物车,正常购物,支付成功
       this.$toast("点击按钮");
+      
+      this.confirmOrder.payStatus=1
+      this.confirmOrder.payType="手机"
+      this.confirmOrder.payTime=new Date()
+      this.confirmOrder.orderStatus=1
+      this.confirmOrder.orderAddressId=1
+      this.confirmOrder.userId=4
+       this.confirmOrder.shopCateIds=this.$route.query.cateIds
+      console.log("confirmOrder:"+JSON.stringify(this.confirmOrder))
+      // generateOrder(this.confirmOrder).then(resp=>{
+      //      //判断是否成功,成功,则跳回
+      // })
     },
+    generateConfirmFormCart(){
+
+    
+       let params={
+         cartIds:this.$route.query.cateIds
+       }
+       generateConfirmOrder(params).then(resp=>{
+           this.confirmOrder = resp.data;
+           let data = this.confirmOrder.mallOrderItems
+           this.products=[]
+           for(let i=0;i<data.length;i++){
+              let value={
+                  imageURL:
+                       "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
+                  title: data[i].goodsName,
+                  desc: data[i].goodsInfo,
+                  price: data[i].sellingPrice,
+                  quantity: data[i].goodsCount
+              }
+              this.products.push(value)
+           }
+          this.confirmOrder.freightAmount=0.0
+       })
+    },
+   generateConfirmFormDetail(){
+
+   }
   },
-  activated(){
+  activated(){  
     //根据key名获取传递回来的参数，data就是map
     this.$on('selectAddress', function(data){
         //赋值给首页的附近医院数据模型
+        console.log('activated data:'+data)
         console.log(1);
     }.bind(this));
-},
+  }
+  
 };
 </script>
 

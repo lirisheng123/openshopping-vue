@@ -37,7 +37,7 @@
                        <router-link  :to="{path:'/search?keyword=null&categoryId='+item.value}">
                      
                       <!-- <router-link to="/search?keyword=null&categoryId="> -->
-                        <img src="//img12.360buyimg.com/focus/jfs/t11824/150/2263801190/3392/8e69e1b3/5a167b8cNdcf71ae5.jpg">
+                        <img :src="item.pic">
                         <span>{{item.label}}</span>
                       </router-link>
                     </li>
@@ -121,6 +121,8 @@ export default {
       console.log("cateChildList:"+this.cateChildList)
     },
     getProductCateList() {
+      
+      
         fetchListWithChildren().then(response => {
           let list = response.data;
           this.productCateOptions = [];
@@ -129,15 +131,24 @@ export default {
             let children = [];
             if (list[i].children != null && list[i].children.length > 0) {
               for (let j = 0; j < list[i].children.length; j++) {
-                children.push({label: list[i].children[j].categoryName, value: list[i].children[j].categoryId});
+                children.push({label: list[i].children[j].categoryName,
+                     value: list[i].children[j].categoryId
+                     ,pic:list[i].children[j].categoryPic});
               }
             }
             this.productCateOptions.push({label: list[i].categoryName, value: list[i].categoryId, children: children});
 
           }
-
+          
           console.log("productCateOptions:"+JSON.stringify(this.productCateOptions) )
-          this.cateChildList=this.productCateOptions[0].children;
+          let categoryId = this.route.query.categoryId;
+          if(categoryId!=null){
+              this.cateChildList=this.productCateOptions.filter(item=>{
+                item.value=categoryId;
+              })
+          }else{
+             this.cateChildList=this.productCateOptions[0].children;
+          }
           console.log("cateChildList:"+JSON.stringify( this.cateChildList) )
 
         });

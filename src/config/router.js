@@ -11,6 +11,7 @@ const routes = [
   {
     name: 'home',
     component: () => import('../page/index'),
+    // component: () => import('../home/home'),
     meta: {
       title: '首页'
     }
