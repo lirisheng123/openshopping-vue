@@ -32,8 +32,8 @@
             <img src="https://img11.360buyimg.com/mcoss/jfs/t1/1072/23/3672/95463/5b9a0813E175891fa/e38fc2f7c2ddfec2.jpg" />
             <div class="category-div">
                 <h4>分类</h4>
-                <ul v-for="(item,index) in cateChildList"  :key="index">
-                    <li>
+                <!-- <ul v-for="(item,index) in cateChildList"  :key="index"> -->
+                    <li v-for="(item,index) in cateChildList"  :key="index">
                        <router-link  :to="{path:'/search?keyword=null&categoryId='+item.value}">
                      
                       <!-- <router-link to="/search?keyword=null&categoryId="> -->
@@ -54,7 +54,7 @@
                         </a>
                     </li> -->
                     <div style="clear:both"></div>
-                </ul>
+                <!-- </ul> -->
             </div>
             <!-- <div class="category-div">
                 <h4>热门分类</h4>
@@ -136,16 +136,18 @@ export default {
                      ,pic:list[i].children[j].categoryPic});
               }
             }
-            this.productCateOptions.push({label: list[i].categoryName, value: list[i].categoryId, children: children});
+            this.productCateOptions.push({label: list[i].categoryName, value: list[i].categoryId, 
+               children: children,pic:list[i].categoryPic});
 
           }
           
           console.log("productCateOptions:"+JSON.stringify(this.productCateOptions) )
-          let categoryId = this.route.query.categoryId;
+          let categoryId = this.$route.query.categoryId;
+           console.log("categoryId:"+JSON.stringify(categoryId) )
           if(categoryId!=null){
               this.cateChildList=this.productCateOptions.filter(item=>{
-                item.value=categoryId;
-              })
+                return item.value==categoryId;
+              })[0].children;
           }else{
              this.cateChildList=this.productCateOptions[0].children;
           }

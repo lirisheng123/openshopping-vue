@@ -65,7 +65,7 @@ export default {
         return{
             topheight:0,
             page:{},
-            pageData,
+            
             banners:null,
             quicknavlist:null,
             customs:null,
@@ -84,7 +84,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style   lang="less" scoped>
+
 .column-title {
   text-align: left;
   font-size: 30px;
@@ -123,24 +124,24 @@ export default {
       border-top: 1px solid #f5f5f5;
       border-right: 1px solid #f5f5f5;
 
-      @at-root .recommend-text {
-        width: 100%;
-        height: 60px;
+      // @at-root .recommend-text {
+      //   width: 100%;
+      //   height: 60px;
 
-        .recommend-title {
-          font-size: 28px;
-          font-weight: normal;
-        }
+      //   .recommend-title {
+      //     font-size: 28px;
+      //     font-weight: normal;
+      //   }
 
-        .recommend-desc {
-          font-size: 24px;
-        }
-      }
+      //   .recommend-desc {
+      //     font-size: 24px;
+      //   }
+      // }
 
-      @at-root .recommend-img {
-        width: 100%;
-        margin-top: 15px;
-      }
+      // @at-root .recommend-img {
+      //   width: 100%;
+      //   margin-top: 15px;
+      // }
     }
 
     .recommend-item:last-child {
@@ -157,7 +158,7 @@ export default {
       }
     }
 
-    .recommend-item-col04 {
+.recommend-item-col04 {
       width: 25%;
       height: 250px;
 
@@ -172,4 +173,24 @@ export default {
     }
   }
 }
+
+ .recommend-text {
+        width: 100%;
+        height: 60px;
+
+        .recommend-title {
+          font-size: 28px;
+          font-weight: normal;
+        }
+
+        .recommend-desc {
+          font-size: 24px;
+        }
+      }
+
+.recommend-img {
+        width: 100%;
+        margin-top: 15px;
+      }
+
 </style>

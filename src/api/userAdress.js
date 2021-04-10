@@ -45,11 +45,19 @@ export function deleteAdress (id) {
 }
 
 
-//选择默认的地址Id
+
 export function  selectedConfired(id,params) {
     return request({
       url:'/userAddress/updateDefaultFlag/'+id,
       method:'get',
       params:params
     })
+}
+
+//选择默认的地址Id
+export function  selectDefaultByUserId(userId) {
+  return request({
+    url:'/userAddress/selectDefault/'+userId,
+    method:'get'
+  })
 }

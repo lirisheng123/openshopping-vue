@@ -15,39 +15,47 @@
             :border="false"
             >
       <template>
-        <div>张三 138****6520</div>
-        <div>广东省深圳市南山区科技园 </div>
+        <!-- <div>{{张三 138****6520}}</div> -->
+        <div>{{orderAddress.userName+orderAddress.userPhone}}</div>
+        <!-- <div>广东省深圳市南山区科技园 </div> -->
+         <div>{{orderAddress.detailAddress}} </div>
       </template>
     </van-cell>
         </van-cell-group>
         
         <div style="height:15px;"></div>
-        <div v-for="(product,i) in products" :key="i">
+        <div v-for="(product,i) in order.products" :key="i">
           <product-card :product='product' />
         </div>
         <div style="height:15px;"></div>
         <van-cell-group>
-            <van-cell title="订单编号" value="18081609422771742" />
-            <van-cell title="下单时间" value="2018-08-16 09:42:27" />
-            <van-cell title="订单状态" value="配送中" />
+            <van-cell title="订单编号" :value="order.orderNo" />
+            <van-cell title="下单时间" :value="order.createTime" />
+            <!-- <van-cell title="订单状态" value="配送中" /> -->
         </van-cell-group>
         <div style="height:15px;"></div>
         <van-cell-group class="total">
-            <van-cell title="商品总额" value="9.99" />
-            <van-cell title="运费" value="+ 0.00" />
-            <van-cell title="实付金额" value="9.99" style="font-weight: 700;" />
+            <van-cell title="商品总额" :value="order.totalAmount" />
+            <van-cell title="运费" :value="order.freightAmount" />
+            <van-cell title="实付金额" :value="order.payAmount" style="font-weight: 700;" />
         </van-cell-group>
         <div class="footer">
             <div class="munu">
-                <van-button size="small">确认收货</van-button>
-                <van-button size="small" type="danger">支付</van-button>
+                <!-- <van-button size="small">确认收货</van-button>
+                <van-button size="small" type="danger">支付</van-button> -->
+                 <van-button v-if="orderReturnApply.applyStatus" @click="applyReturn(true)"   size="small">申请退款</van-button>
+                 <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==0" @click="applyReturn(false)"  size="small">退款审核中</van-button>
+                 <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==1" @click="applyReturn(false)"  size="small">审核通过</van-button>
+                 <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==2" @click="applyReturn(false)"  size="small">审核不通过</van-button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-
+import {selectOrderReturnApply} from "@/api/returnApply"
+import {selectOrderById} from "@/api/order"
+import {selectorderAddress} from "@/api/orderAddress"
 export default {
     data(){
         return{
@@ -65,8 +73,68 @@ export default {
                     price:'499',
                     quantity:2
                 },
-            ]
+            ],
+            order:{},
+            orderAddress:{},
+            orderReturnApply:{}
         }
+    },
+    created(){
+       //获取active 和orderId
+       //this.$route.params.id;
+       this.active = this.$route.query.active;
+       this.fetchOrder()
+       this.getOrderAddress()
+       this.getOrderReturnApply()
+       
+    },
+    methods:{
+       fetchOrder:function(){
+           selectOrderById(this.$route.params.id).then(resp=>{
+               let data = resp.data;
+               this.order={
+                orderId:data.orderId,   
+                orderNo:data.orderNo,
+                createTime:data.createTime,   
+                totalAmount:data.totalAmount,
+                freightAmount:data.freightAmount,
+                payAmount:data.payAmount,
+                payStatus:data.payStatus
+               }
+                 let orderitem= data.mallOrderItems; 
+               this.order.products=[]
+                 for(let j=0;j<orderitem.length;j++){
+                      let value={
+                        imageURL: orderitem[j].goodsCoverImg,
+                        title: orderitem[j].goodsName,
+                        price: orderitem[j].sellingPrice,
+                        quantity: orderitem[j].goodsCount
+                      }
+                      this.order.products.push(value)
+                 }
+               
+           })
+       },
+       getOrderAddress:function(){
+          selectorderAddress(this.$route.params.id).then(resp=>{
+              this.orderAddress= resp.data;
+          })
+       },
+       getOrderReturnApply:function(){
+            selectOrderReturnApply(this.$route.params.id).then(resp=>{
+                this.orderReturnApply=resp.data;
+                console.log("orderReturnApply:"+JSON.stringify(this.orderReturnApply))
+                //判断对象是否为空
+                if(Object.keys(this.orderReturnApply).length==0){
+                    this.orderReturnApply.applyStatus=true;
+                }else{
+                     this.orderReturnApply.applyStatus=false;
+                }
+            })
+       },
+       applyReturn:function(edit){
+           this.$router.push({path:"/user/order1/returnapply",query:{edit:edit,id:this.order.orderId}})
+       }
     }
 }
 </script>

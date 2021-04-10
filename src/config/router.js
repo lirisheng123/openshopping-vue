@@ -62,6 +62,7 @@ const routes = [
   },
   {
     path: '/user/address',
+    name:"address",
     component: () => import('../page/user/address/list'),
     meta: {
       title: '我的地址'
@@ -107,6 +108,13 @@ const routes = [
     component: () => import('../page/user/order/info'),
     meta: {
       title: '我的订单'
+    }
+  },
+  {
+    path: '/user/order1/returnapply',
+    component: () => import('../page/user/order/returnapply'),
+    meta: {
+      title: '订单退款'
     }
   },
   {
@@ -169,7 +177,9 @@ const routes = [
     path: '/order',
     component: () => import('../page/shipping/order'),
     meta: {
-      title: '确认订单'
+      keepAlive : true,
+      title: '确认订单',
+      isBack: false
     }
   },
   {

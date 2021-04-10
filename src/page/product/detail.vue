@@ -295,8 +295,9 @@ export default {
               express: '免运费',
               remain: 19,
               thumb: [
-                'https://img.yzcdn.cn/public_files/2017/10/24/e5a5a02309a41f9f5def56684808d9ae.jpeg',
-                'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
+                  this.product.goodsCoverImg,
+                  this.product.goodsCoverImg
+                // 'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
               ],
               info:'<p style="text-align:center;"><img src="https://haitao.nosdn2.127.net/ac19460151ee4d95a6657202bcfc653c1531470912089jjjq8ml410763.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/2a91cfad22404e5498d347672b1440301531470912182jjjq8mnq10764.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/caddd5a213de4c1cb1347c267e8275731531470912412jjjq8mu410765.jpg" ></p>',
           }
@@ -317,9 +318,6 @@ export default {
 
        })
       
-     
-     
-        
     },
     getSkuData(){
       console.log("enter sku data")

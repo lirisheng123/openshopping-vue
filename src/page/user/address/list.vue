@@ -19,7 +19,7 @@ import { GetAddressList } from "../../../api/user.js";
 import { AddressList } from 'vant';
 
 import { fetchList ,deleteAdress,selectedConfired} from "@/api/userAdress";
-
+import eventBus from '@/utils/eventbus.js';
 
 
 export default {
@@ -46,13 +46,18 @@ export default {
             if(!this.isSelect){
                 return;
             }
-            this.$emit('selectAddress',item);
+            // this.$emit('selectAddress',item);
+             eventBus.$emit('selectAddress',item);
             this.$router.go(-1);
         }
     },
     created:function(){
-        // this.chosenAddressId=this.$route.query.id;
-        // this.isSelect=this.$route.query.id>0;
+
+        this.chosenAddressId=this.$route.query.id;
+        this.isSelect=this.$route.query.id>0;
+        // if(this.$route.query.id==2){
+        //     this.isSelect=true;
+        // }
         let userId =4
         fetchList(userId).then(response=>{
             let data=response.data;
@@ -70,10 +75,10 @@ export default {
 
                 }
                 this.list.push(value)
-                if(data[i].defaultFlag==1){
-                    this.chosenAddressId=data[i].addressId;
-                    this.isSelect=true; 
-                }
+                // if(data[i].defaultFlag==1){
+                //     this.chosenAddressId=data[i].addressId;
+                //     this.isSelect=true; 
+                // }
             }
             
         })

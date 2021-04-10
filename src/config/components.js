@@ -21,6 +21,7 @@ import {
   Badge, BadgeGroup,Popup,Stepper,RadioGroup, Radio,Picker,Uploader,Info
 } from 'vant';
 
+
 const components=[
     Tag,
     Col,
@@ -49,3 +50,5 @@ export default (Vue)=>{
         Vue.component(Component.name, Component)
     });
 }
+
+
