@@ -26,7 +26,46 @@
             </div>
             <van-popup v-model="filtershow" position="right" class="filterlayer" >
                 <div class="filterInner" style="overflow-y: scroll;max-height: 100%;">
-                    <ul>
+                  <ul  v-for="(item,index) in list" :key="index">
+                        <li>
+                           <van-cell :title="item.title" is-link  />
+                        </li>
+                        <div style="clear: both;"></div>
+                        <div class="tags_selection">
+                            <el-checkbox-group v-model="item.checkerValue">
+                               <el-checkbox-button   v-for=" (item,index) in item.options" :label="item.value" :key="index">{{item.text}}</el-checkbox-button>
+                            </el-checkbox-group>
+                           <div style="clear: both;"></div>
+                        </div>
+                  </ul>
+                    <!-- <ul>
+                        <li>
+                            <van-cell title="清洁类型" is-link arrow-direction="down" />
+                        </li>
+                        <div style="clear: both;"></div>
+                        <div class="tags_selection">
+                            <div class="option">
+                                <a href="javascript:void 0;">牙龈护理111</a>
+                            </div>
+                            <div class="option ">
+                                <a href="javascript:void 0;">抛光</a>
+                            </div>
+                            <div class="option ">
+                                <a href="javascript:void 0;">清洁</a>
+                            </div>
+                            <div class="option ">
+                                <a href="javascript:void 0;">正畸专用</a>
+                            </div>
+                            <div class="option ">
+                                <a href="javascript:void 0;">敏感</a>
+                            </div>
+                            <div class="option ">
+                                <a href="javascript:void 0;">亮白</a>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+                    </ul> -->
+                    <!-- <ul>
                         <li>
                             <van-cell title="清洁类型" is-link arrow-direction="down" />
                         </li>
@@ -133,41 +172,21 @@
                             </div>
                             <div style="clear: both;"></div>
                         </div>
-                    </ul>
-                    <ul>
-                        <li>
-                            <van-cell title="清洁类型" is-link arrow-direction="down" />
-                        </li>
-                        <div style="clear: both;"></div>
-                        <div class="tags_selection">
-                            <div class="option">
-                                <a href="javascript:void 0;">牙龈护理111</a>
-                            </div>
-                            <div class="option ">
-                                <a href="javascript:void 0;">抛光</a>
-                            </div>
-                            <div class="option ">
-                                <a href="javascript:void 0;">清洁</a>
-                            </div>
-                            <div class="option ">
-                                <a href="javascript:void 0;">正畸专用</a>
-                            </div>
-                            <div class="option ">
-                                <a href="javascript:void 0;">敏感</a>
-                            </div>
-                            <div class="option ">
-                                <a href="javascript:void 0;">亮白</a>
-                            </div>
-                            <div style="clear: both;"></div>
-                        </div>
-                    </ul>
+                    </ul> -->
+                   <!-- <cube-checker
+                     v-model="checkerValue"
+                      :options="options" /> -->
+                       <!-- <el-checkbox-group v-model="checkerValue">
+                        <el-checkbox-button v-for=" (item,index) in options" :label="item.value" :key="index">{{item.text}}</el-checkbox-button>
+                      </el-checkbox-group> -->
+                     
                     <div style="clear: both;"></div>
-                    <van-button size="large"  style="height: 40px;margin-bottom: 15px;line-height: 40px;">清楚选项</van-button>
+                    <!-- <van-button size="large"  style="height: 40px;margin-bottom: 15px;line-height: 40px;">清楚选项</van-button> -->
                     <div style="height:50px;"></div>
                 </div>
                 <div class="filterlayer_bottom_buttons">
                     <span class="filterlayer_bottom_button cancel">取消</span>
-                    <span class="filterlayer_bottom_button confirm">确认</span>
+                    <span @click="confirmSelect" class="filterlayer_bottom_button confirm">确认</span>
                 </div>
             </van-popup>
         </div>
@@ -181,8 +200,11 @@
 
 <script>
 import searchtop from "../../components/search/searchtop";
+// import { cubeChecker } from "cube-ui";
 import {fetchList } from "@/api/product";
 import { Search } from "vant";
+import { fetchBrandListByCateId,fetchParamsByCateId } from "@/api/productCate";
+// import{Checker} from 'Cube'
 
 export default {
   // components: {
@@ -190,6 +212,7 @@ export default {
   // },
    components:{
         [Search.name]:Search,
+        // cubeChecker
     },
   data() {
     return {
@@ -198,7 +221,54 @@ export default {
       filtersort: false,
       filtershow: false,
       value:"",
-      products:[]
+      products:[],
+      checkerValue: [],
+      options: [
+        {
+          value: 1,
+          text: 'red'
+        },
+        {
+          value: 2,
+          text: 'yellow'
+        },
+        {
+          value: 3,
+          text: 'blue'
+        },
+        {
+          value: 4,
+          text: 'green'
+        }
+      ],
+      list:[{
+        title:"品牌",
+        options: [
+        {
+          value: 1,
+          text: 'red'
+        },
+        {
+          value: 2,
+          text: 'yellow'
+        },
+        {
+          value: 3,
+          text: 'blue'
+        },
+        {
+          value: 4,
+          text: 'green'
+        },
+        {
+          value: 5,
+          text: 'green'
+        }
+      ]
+      }]
+
+      
+    
       
             // products:[
             //     {
@@ -288,8 +358,7 @@ export default {
              for(let i=0;i< list.length;i++){
                let product={
                  id: list[i].goodsId,
-                //  imageURL: list[i].goodsCoverImg,
-                imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+                 imageURL: list[i].goodsCoverImg,
                  title: list[i].goodsName,
                  price: list[i].sellingPrice
                }
@@ -315,8 +384,8 @@ export default {
              for(let i=0;i< list.length;i++){
                let product={
                  id: list[i].goodsId,
-                //  imageURL: list[i].goodsCoverImg,
-                imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+                 imageURL: list[i].goodsCoverImg,
+                // imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
                  title: list[i].goodsName,
                  price: list[i].sellingPrice
                }
@@ -325,12 +394,62 @@ export default {
        })
 
     },
+    getBrandList(){
+     
+       fetchBrandListByCateId(this.$route.query.categoryId).then(resp=>{
+            let data = resp.data;
+            let value=[]
+            for(let i=0;i<data.length;i++){
+                
+                let value1 = {
+                 "value": data[i].grandId,
+                 "text": data[i].grandName,
+                }
+               
+                value.push(value1)
+              
+            }
+              this.list.push({title:"品牌",options:value})
+           
+       })
+    },
+    getParamList(){
+         fetchParamsByCateId(this.$route.query.categoryId).then(resp=>{
+            let data = resp.data;
+            
+            for(let i=0;i<data.length;i++){
+                
+                let value={
+                  title:data[i].categoryParamName
+                }
+                let value2  =data[i].categoryParamValue.split(",")
+                let value3=[]
+                for(let j=0;j<value2.length;j++){
+                    let value4={
+                      "value": value2[j],
+                      "text": value2[j]
+                    }
+                    value3.push(value4)
+                }
+                value.options=value3;
+                this.list.push(value)
+            }
+       })
+    },
+    confirmSelect(){
+       console.log("checkerValue:"+JSON.stringify(this.checkerValue))
+    }
+   
 
   }
 };
 </script>
 
 <style lang="less">
+
+.value-class {
+  flex: none !important;
+}
 .product-list{
     .additional .price{
         position: absolute;
