@@ -1,9 +1,12 @@
 import request from '@/utils/request'
+import prefixName from "./prefixName"
+
+//用户接口服务
 
 //根据userId获取用户的地址
 export function fetchList(userId) {
     return request({
-      url:'/userAddress/list/'+userId,
+      url:prefixName.userService+'/userAddress/list/'+userId,
       method:'get'
     })
 }
@@ -11,7 +14,7 @@ export function fetchList(userId) {
 //根据Id获取用户的地址
 export function select(id) {
     return request({
-      url:'/userAddress/select/'+id,
+      url: prefixName.userService+'/userAddress/select/'+id,
       method:'get'
     })
 }
@@ -20,7 +23,7 @@ export function select(id) {
 //根据地址di来修改地址
 export function update(id,params) {
     return request({
-      url:'/userAddress/update/'+id,
+      url:prefixName.userService+'/userAddress/update/'+id,
       method:'post',
       data:params
     })
@@ -29,7 +32,7 @@ export function update(id,params) {
 //添加用户的地址
 export function create(params) {
     return request({
-      url:'/userAddress/add',
+      url:prefixName.userService+'/userAddress/add',
       method:'post',
       data: params
     })
@@ -39,7 +42,7 @@ export function create(params) {
 //根据id删除用户的地址
 export function deleteAdress (id) {
     return request({
-      url:'/userAddress/delete/'+id,
+      url:prefixName.userService+'/userAddress/delete/'+id,
       method:'get'
     })
 }
@@ -48,7 +51,7 @@ export function deleteAdress (id) {
 
 export function  selectedConfired(id,params) {
     return request({
-      url:'/userAddress/updateDefaultFlag/'+id,
+      url:prefixName.userService+'/userAddress/updateDefaultFlag/'+id,
       method:'get',
       params:params
     })
@@ -57,7 +60,7 @@ export function  selectedConfired(id,params) {
 //选择默认的地址Id
 export function  selectDefaultByUserId(userId) {
   return request({
-    url:'/userAddress/selectDefault/'+userId,
+    url:prefixName.userService+'/userAddress/selectDefault/'+userId,
     method:'get'
   })
 }

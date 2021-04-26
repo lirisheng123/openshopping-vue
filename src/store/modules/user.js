@@ -1,10 +1,13 @@
-import { login, logout } from '@/api/login'
+import { login, logout ,getInfo} from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+
 
 const user = {
   state: {
     token: getToken(),
+    userId:'',
     name: '',
+    roles:[],
     avatar: ''
   },
 
@@ -14,6 +17,9 @@ const user = {
     },
     SET_NAME: (state, name) => {
       state.name = name
+    },
+    SET_USERID: (state, userId) => {
+      state.userId = userId
     },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar
@@ -29,11 +35,31 @@ const user = {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
         login(username, userInfo.password).then(response => {
-          const data = response.data
-          const tokenStr = data.tokenHead+data.token
+          if(response.code!=200){
+            //登录失败
+            reject(response.message)
+            return 
+          }
+          const tokenStr =  response.data.tokenHead+ response.data.token
           setToken(tokenStr)
           commit('SET_TOKEN', tokenStr)
-          resolve()
+          //获取用户的信息
+          getInfo().then(resp=>{
+             if(resp.data==null){
+                 //获取信息失败
+                //删除掉用户的登录状态
+                commit('SET_TOKEN', '')
+                removeToken()
+                reject("登录失败,获取用户信息失败")
+                return 
+             }
+             //成功
+             commit('SET_NAME', resp.data.username)
+             commit('SET_USERID', resp.data.userId)
+             commit('SET_ROLES', resp.data.roles)
+             resolve()
+          })
+         
         }).catch(error => {
           reject(error)
         })
@@ -62,14 +88,23 @@ const user = {
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
+         
           commit('SET_TOKEN', '')
           commit('SET_ROLES', [])
+          commit('SET_NAME', '')
+          commit('SET_USERID', '')
           removeToken()
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
+          resolve()   
+        // logout(state.token).then(() => {
+        //   commit('SET_TOKEN', '')
+        //   commit('SET_ROLES', [])
+        //   removeToken()
+        //   resolve()
+        // }).catch(error => {
+        //   reject(error)
+        // })
+      }).catch(error => {
+        reject(error)
       })
     },
 

@@ -19,7 +19,7 @@
                     <van-tag  v-for="tag in product.tags" :key="tag" plain type="danger">{{tag}}</van-tag>
                     </ul>
                 </p>
-                <van-stepper v-if="iscard" v-model="product.quantity" :max="product.max"  :min="product.min" />
+                <van-stepper v-if="iscard" v-model="product.quantity" :max="product.max"  :min="product.min"  :onChange="onChange(product)" />
             </template>
         </van-card>
         <van-cell  v-for="(gift,j) in product.gift" :key="j"  :value="'x'+gift.quantity" >
@@ -41,6 +41,12 @@ export default {
             type: Boolean,
             default: false
         },
+    },
+    methods: {
+      onChange(product){
+          console.log("child product quantity:"+JSON.stringify(product))
+          this.$emit('onChange', product)
+      }
     }
 }
 </script>

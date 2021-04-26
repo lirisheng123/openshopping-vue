@@ -46,7 +46,8 @@
                  <van-button v-if="orderReturnApply.applyStatus" @click="applyReturn(true)"   size="small">申请退款</van-button>
                  <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==0" @click="applyReturn(false)"  size="small">退款审核中</van-button>
                  <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==1" @click="applyReturn(false)"  size="small">审核通过</van-button>
-                 <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==2" @click="applyReturn(false)"  size="small">审核不通过</van-button>
+                 <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==2" @click="applyReturn(false)"  size="small">完成</van-button>
+                   <van-button v-if="orderReturnApply.applyStatus==false && orderReturnApply.status==3" @click="applyReturn(false)"  size="small">审核不通过</van-button>
             </div>
         </div>
     </div>
@@ -125,7 +126,8 @@ export default {
                 this.orderReturnApply=resp.data;
                 console.log("orderReturnApply:"+JSON.stringify(this.orderReturnApply))
                 //判断对象是否为空
-                if(Object.keys(this.orderReturnApply).length==0){
+                if(this.orderReturnApply==null||Object.keys(this.orderReturnApply).length==0){
+                    this.orderReturnApply={}
                     this.orderReturnApply.applyStatus=true;
                 }else{
                      this.orderReturnApply.applyStatus=false;
@@ -133,7 +135,17 @@ export default {
             })
        },
        applyReturn:function(edit){
-           this.$router.push({path:"/user/order1/returnapply",query:{edit:edit,id:this.order.orderId}})
+           let params ={
+               returnName:this.orderAddress.userName,
+               returnPhone:this.orderAddress.userPhone,
+               returnAmount:this.order.payAmount
+           }
+           if(edit){
+                this.$router.push({path:"/user/order1/returnapply",query:{edit:edit,id:this.order.orderId,params:JSON.stringify(params) }})
+           }else{
+                 this.$router.push({path:"/user/order1/returnapply",query:{edit:edit,id:this.order.orderId}})
+           }
+        
        }
     }
 }

@@ -34,7 +34,7 @@ export default {
   methods: {
     onSave(data) {
       console.log("data:"+JSON.stringify(data))
-      let userId=4;
+      let userId=this.$store.getters.userId;
       let defautFlag= data.isDefault?1:0
       let param={
         "addressId":data.id,

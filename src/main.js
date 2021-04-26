@@ -11,6 +11,7 @@ import VueAwesomeSwiper from 'vue-awesome-swiper';
 import payment from 'vue-payment';  // 引用
 // import "./cube.min.css"
 // import CubeUI from  "./cube.min"
+import store from "@/store"
 
 // Vue.use(CubeUI)
 Vue.use(payment);
@@ -25,6 +26,7 @@ Vue.use(VueAwesomeSwiper)
 
 new Vue({
   router,
+  store,
   el: '#app',
   render: h => h(App)
 });

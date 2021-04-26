@@ -82,9 +82,9 @@
       </van-row>
     </van-cell-group>
 
-    <van-cell-group>
+    <!-- <van-cell-group>
       <van-cell title="切换账号" is-link to="/login" />
-    </van-cell-group>
+    </van-cell-group> -->
     <navigate />
   </div>
 </template>
@@ -92,7 +92,7 @@
 <script>
 import { GetUserIndex } from "../../api/user.js";
 import { Message } from 'element-ui';
-
+import getters from '@/store/getters'
 export default {
   data(){
     return{
@@ -102,11 +102,17 @@ export default {
   components: {
   },
   created:function(){
-       Message.info("process.env.BASE_API:"+process.env.BASE_API)
-        Message.info("process.env.NODE_ENV:"+process.env.NODE_ENV)
-      GetUserIndex().then(response=>{
-          this.data=response;
-      });
+        // Message.info("process.env.BASE_API:"+process.env.BASE_API)
+        // Message.info("process.env.NODE_ENV:"+process.env.NODE_ENV)
+      // GetUserIndex().then(response=>{
+      //     this.data=response;
+      // });
+    console.log("token:"+this.$store.getters.token)
+    if(this.$store.getters.token==undefined||this.$store.getters.token==null||this.$store.getters.token==''){
+       //没登录
+       this.$router.push("/login")
+       return
+    }
   },
 };
 </script>

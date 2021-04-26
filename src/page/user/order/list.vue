@@ -26,10 +26,13 @@
                         </div>
                         <div slot="footer">
                              <span class="total">{{"总价"+item.payAmount}}</span>
-                            <van-button    v-if="item.status==2" size="small">确认收货</van-button> 
-                             <!-- <van-button v-if="item.status==4" size="small">退货中</van-button>                            -->
+                            <van-button   v-if="item.status==2" size="small">确认收货</van-button> 
+                            <van-button v-if="item.status==4" size="small">退货中</van-button>                           
                             <van-button v-if="item.status==0" size="small" type="danger">支付</van-button>
-                            <!-- <van-button size="small">确认收货</van-button> -->
+                            <van-button  v-if="item.status==1"  size="small">待发货</van-button>
+                            <van-button  v-if="item.status==3"  size="small">已完成</van-button>
+                            <van-button  v-if="item.status==5"  size="small">已取消</van-button>
+
                         </div>
                     </van-panel>
                 </van-cell-group>
@@ -62,7 +65,8 @@
                             <span class="total">{{"总价"+item.payAmount}}</span>
                             <!-- <van-button v-if="item.status==2" size="small">确认收货</van-button>  -->
                              <!-- <van-button v-if="item.status==4" size="small">退货中</van-button>                            -->
-                            <van-button @click="changeOrderStatus(item.orderid,1)" v-if="item.status==0" size="small" type="danger">支付</van-button>
+                            <van-button @click="submitForPay(item.orderid)" v-if="item.status==0" size="small" type="danger">支付</van-button>
+                            <van-button @click="changeOrderStatus(item.orderid,5)" v-if="item.status==0" size="small" type="danger">取消支付</van-button>
                             <!-- <van-button size="small">确认收货</van-button>      -->
                         </div>
                     </van-panel>
@@ -92,7 +96,7 @@
                         </div>
                         <div slot="footer">
                             <span class="total">{{"总价"+item.payAmount}}</span>
-                            <!-- <van-button v-if="item.status==2" size="small">确认收货</van-button>  -->
+                            <van-button  size="small">待发货</van-button> 
                              <!-- <van-button v-if="item.status==4" size="small">退货中</van-button>                            -->
                             <!-- <van-button v-if="item.status==0" size="small" type="danger">支付</van-button> -->
                             <!-- <van-button size="small">确认收货</van-button>      -->
@@ -125,8 +129,8 @@
                         </div>
                         <div slot="footer">
                             <span class="total">{{"总价"+item.payAmount}}</span>
-                            <van-button  @click="changeOrderStatus(item.orderid,3)"  v-if="item.status==2" size="small">确认收货</van-button> 
-                             <!-- <van-button v-if="item.status==4" size="small">退货中</van-button>                            -->
+                            <van-button  @click="changeOrderStatus(item.orderid,3)"  v-if="item.status==2" size="small" type="danger">确认收货</van-button> 
+                             <van-button v-if="item.status==4" size="small">退货中</van-button>                           
                             <!-- <van-button v-if="item.status==0" size="small" type="danger">支付</van-button> -->
                             <!-- <van-button size="small">确认收货</van-button>      -->
                         </div>
@@ -158,6 +162,8 @@
                         </div>
                         <div slot="footer">
                             <span class="total">{{"总价:"+item.payAmount}}</span>
+                             <van-button  v-if="item.status==3"  size="small">已完成</van-button>
+                            <van-button  v-if="item.status==5"  size="small">已取消</van-button>
                             <!-- <van-button v-if="item.status==2" size="small">确认收货</van-button>  -->
                              <!-- <van-button v-if="item.status==4" size="small">退货中</van-button>                            -->
                             <!-- <van-button v-if="item.status==0" size="small" type="danger">支付</van-button> -->
@@ -170,6 +176,15 @@
              
         <!-- <van-tab title="已取消">内容 5</van-tab> -->
     </van-tabs>
+    <payment 
+          :payShow="payShow" 
+          :payStatus="payStatus" 
+          :payTitle = "payTitle"
+          @paySubmit="submitFns" 
+          @payClose="payCloseClick"
+     >
+    </payment>
+
 </div>
 </template>
 
@@ -265,7 +280,12 @@ export default {
             receiveList:[],
             payList:[],
             sendList:[],
-            finishList:[]
+            finishList:[],
+            payAction:false,
+            payShow: false,
+            payStatus: "",
+            payTitle:"请输入支付密码",
+            payOrderId:null
 
         }
     },
@@ -281,7 +301,7 @@ export default {
     },
     methods:{
         getAllList:function(){
-           let userId=4; 
+           let userId=this.$store.getters.userId; 
           let params={
               pageNum:1,
               pageSize:5,
@@ -290,7 +310,7 @@ export default {
            this.allList=this.fetchList(userId,params);
         },
         getReceiveList:function(){
-            let userId=4; 
+            let userId=this.$store.getters.userId; 
             let params={
               pageNum:1,
               pageSize:5,
@@ -299,7 +319,7 @@ export default {
             this.receiveList=this.fetchList(userId,params);
         },
         getPayList:function(){
-           let userId=4; 
+           let userId=this.$store.getters.userId; 
             let params={
               pageNum:1,
               pageSize:5,
@@ -308,7 +328,7 @@ export default {
             this.payList=this.fetchList(userId,params);
         },
         getSendList:function(){
-           let userId=4; 
+           let userId=this.$store.getters.userId; 
             let params={
               pageNum:1,
               pageSize:5,
@@ -317,7 +337,7 @@ export default {
             this.sendList=this.fetchList(userId,params);
         },
         getFinishList:function(){
-             let userId=4; 
+             let userId=this.$store.getters.userId; 
             let params={
               pageNum:1,
               pageSize:5,
@@ -408,7 +428,41 @@ export default {
           console.log("date:"+time2)
           return time2;
 
-        }   
+        },
+        payCloseClick(){
+            this.payShow = false;
+            console.log("关闭支付键盘")  
+           
+        },
+        submitFns:function(value){
+            // 关闭键盘
+            // let vm =this
+            if(value=='123456'){
+                //密码正确
+                setTimeout(function(_this){
+                    _this.payStatus = true;
+                    // _this.$toast("s支付成功");
+                    console.log("orderId:"+_this.payOrderId)
+                    if(_this.payOrderId!=null){
+                         _this.changeOrderStatus(_this.payOrderId,1)
+                    }
+                    console.log("支付成功")  
+                    
+                },100,this)
+                // console.log("支付成功")  
+                // this.$toast("支付成功");
+            }else{
+                // 密码错误
+                setTimeout(function(_this){
+                    _this.payStatus = false;
+                    this.$toast("支付失败");
+                },100,this)
+            }
+        },
+        submitForPay(orderId){
+            this.payShow=true;
+            this.payOrderId=orderId
+        }
     }
     
 }

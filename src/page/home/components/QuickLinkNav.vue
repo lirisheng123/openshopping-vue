@@ -10,7 +10,9 @@
                         <span>{{item.label}}</span>
                       </router-link> -->
         <span class="quick-box">
-          <router-link  :to="{path:'/category?categoryId='+item.value}">
+          <!-- <router-link  :to='{"path":"/category?categoryId="+item.value}'> -->
+           <router-link  :to='item | formateUrl' >
+           
           <img :src="item.icon" />
           </router-link> 
           <span class="ellipsis">{{ item.label }}</span>
@@ -41,8 +43,28 @@ export default {
             goodslist:null
         }
     },
+    
     created(){
            
+    },
+    filters:{
+        formateUrl(item){
+          
+          if(item==undefined||item==null){
+            return ""
+          }
+          let params={}
+          if(item.url!=undefined&&item.url!=null){
+           
+              params.path = item.url
+
+          }else{
+               
+              params.path = "/category?categoryId="+item.value
+          }
+          console.log("url:"+JSON.stringify(params))
+          return  params
+        }
     },
     methods:{
         settopheight:function(value){

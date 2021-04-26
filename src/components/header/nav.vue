@@ -19,7 +19,13 @@ export default {
     },
     methods: {
         onBack() {
-        history.back();
+            if(this.title=="我的订单"){
+               this.$router.push("/user/index")
+            }else{
+                history.back();
+            }
+          
+           
         },
     }
 }

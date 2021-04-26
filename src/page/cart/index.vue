@@ -1,11 +1,12 @@
 <template>
+ <div>
   <div class="card">
     <headerNav title="购物车"/>
-       <van-cell  value="编辑商品" class="head">
-        <template slot="title">
+       <van-cell  :value="editName" @click="editClick()"  class="head">
+        <!-- <template slot="title"  >
           <van-checkbox v-model="checkedAll" >全选</van-checkbox>
-        </template>
-      </van-cell>
+        </template> -->
+       </van-cell>
         
     <van-checkbox-group class="card-goods" v-model="checkedGoods">
       
@@ -14,15 +15,15 @@
           :key="index" class="card-goods__item"> 
           <van-checkbox :name="item.id"></van-checkbox>
 
-          <product-card :product='item' :iscard='true' >
-            <template slot>
-              <van-cell value="修改" >
+          <product-card :product='item' :iscard='true' @onChange="onChange"  >
+            <!-- <template slot>
+              <van-cell value="" >
                   <template slot="title">
-                      <van-tag type="danger">促销</van-tag>
-                      <span class="van-cell-text" >满60元减5元</span>
+                      <van-tag type="danger">{{""}}</van-tag>
+                      <span class="van-cell-text" >{{""}}</span>
                   </template>
               </van-cell>
-            </template>
+            </template> -->
           </product-card>
         </div>
         </div>
@@ -74,29 +75,49 @@
         </div>  -->
     </van-checkbox-group>
     
-    <div style="height:50px;"></div>
-    <van-submit-bar
+    <!-- <div style="height:50px;"></div> -->
+     
+    <van-submit-bar v-if="!isEidt"
       :price="totalPrice"
       :disabled="!checkedGoods.length"
       :button-text="submitBarText"
       @submit="onSubmit"
     >
-     <!-- <template slot>
-      <van-checkbox v-model="checkedAll" >全选</van-checkbox>
-    </template> -->
+    <template slot>
+      <van-checkbox v-model="checkedAll"  >全选</van-checkbox>
+    </template>
     </van-submit-bar> 
+  <!-- <div v-if="isEidt" >
+     <van-button @click="deleteClick()" :disabled="!checkedGoods.length"   size="normal" center square type="danger">删除</van-button>
+  </div> -->
+    <van-cell v-if="isEidt"  class="bottom"   > 
+        <template slot="title">
+          <van-checkbox v-model="checkedAll"   >全选</van-checkbox>
+           <!-- <van-button :click="deleteClick()" :disabled="!checkedGoods.length"   size="normal" center square type="danger">删除</van-button> -->
+        </template>
+        <template slot="right-icon"  >
+          <van-button @click="deleteClick()" :disabled="!checkedGoods.length"   size="normal" center square type="danger">删除</van-button>
+        </template>
+     </van-cell> 
+   
   </div>
+  <navigate />
+ </div>
 </template>
 
 <script>
-import {fetchShopList,deleteShoppingCart,clearShopCart} from "@/api/shoppingCart"
-import user from '../../store/modules/user';
+import {fetchShopList,deleteShoppingCart,clearShopCart,updateQuantity} from "@/api/shoppingCart"
+import user from '../../store/modules/user'
+import myButton   from './myButton'
 export default {
   components: {
+    myButton
   },
   data() {
     return {
-      checkedAll:true,
+      checkedAll:false,
+      isEidt:false,
+     
       // checkedGoods: ['1', '2', '3'],
       checkedGoods: [],
       goods:[]
@@ -136,7 +157,26 @@ export default {
     };
   },
   created(){
+      if(this.$store.getters.token==undefined||this.$store.getters.token==null||this.$store.getters.token==''){
+       //没登录
+         this.$router.push("/login")
+         return
+       }
      this.getShopCartList()
+  },
+  watch: {
+     checkedAll: function (val) {
+        console.log("checkedAll:"+typeof(val) )
+        if(val==true){
+          this.checkedGoods=this.goods.map(item=>{
+            return  item.id
+          })
+        }else{
+            console.log("checkedAll:false")
+           this.checkedGoods=[]
+         }
+       }
+     
   },
   computed: {
     submitBarText() {
@@ -146,6 +186,10 @@ export default {
     totalPrice() {
       return this.goods.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? parseFloat(item.price)*(item.quantity)*100: 0), 0);
     },
+
+    editName(){
+      return this.isEidt?"完成":"管理"
+    }
   },
   methods: {
     onSubmit() {
@@ -163,7 +207,9 @@ export default {
     },
     getShopCartList(){
         //暂时默认为4,等与权限集成的时候,在进行改变
-       let userId=4
+       let userId=this.$store.getters.userId
+       this.goods=[]
+       console.log("goods:"+JSON.stringify(this.goods))
        fetchShopList(userId).then(resp=>{
           let data= resp.data;
           for(let i=0;i<data.length;i++){
@@ -173,10 +219,43 @@ export default {
                 desc: data[i].goodsInfo,
                 price: data[i].goodsPrice,
                 quantity:data[i].goodsCount,
-                imageURL: 'https://img.yzcdn.cn/public_files/2017/10/24/2f9a36046449dafb8608e99990b3c205.jpeg',
-                imageTag:'比加入时降5元',
+                imageURL:data[i].goodsCoverImg,
+                imageTag:''
+                // imageTag:'比加入时降5元',
             }
             this.goods.push(value)
+          }
+       })
+    },
+    editClick(){
+      this.isEidt=!this.isEidt
+    },
+    onChange(product){
+      console.log("quantity product:"+JSON.stringify(product))
+      //更改购物的状态
+      updateQuantity(product.id,{quantity:product.quantity}).then(resp=>{
+        if(resp.code!=200){
+          this.$toast("修改数量失败")
+        }
+      })
+    },
+    deleteClick(){
+      // console.log("value:"+value)
+       console.log("删除触发")
+       let userId=this.$store.getters.userId
+       let param={
+         ids:this.checkedGoods
+       }
+       console.log("delete:"+param)
+       deleteShoppingCart(userId,this.checkedGoods).then(resp=>{
+          if(resp.code!=200){
+             this.$$toast("删除失败")
+          }else{
+            //删除成功
+            this.getShopCartList()
+            this.checkedAll=false
+            // this.checkedGood=[]
+            
           }
        })
     }
@@ -206,8 +285,20 @@ export default {
 }
 .head{
       padding-left: 5px;
-  border-bottom: 1px solid #eee;
+     border-bottom: 1px solid #eee;
 }
+
+.bottom{
+     
+    left: 0;
+    bottom: 50px;
+    width: 100%;
+    z-index: 100;
+    position: fixed;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 .card{
   background: #f7f7f7;
   .van-submit-bar__bar {
@@ -233,6 +324,23 @@ export default {
       margin-top: 10px;
       box-shadow: 5px 5px 5px #e5e5e5;
     }
+}
+
+.edit{
+   padding-left: 5px;
+   border-bottom: 1px solid #eee;
+   position: absolute;
+   bottom: 0px;
+}
+.edit .editButtom{
+   width: 20%;
+   height: 100%;
+}
+
+.van-submit-bar {
+  
+    bottom: 50px;
+   
 }
 
     

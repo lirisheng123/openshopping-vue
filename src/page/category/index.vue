@@ -111,7 +111,7 @@ export default {
   },
   methods: {
     onSearch() {
-
+     this.$router.push({path:"/search",query:{keyword:this.value}})
        //跳转到list页面
        
     },

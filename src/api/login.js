@@ -1,22 +1,44 @@
 import request from '@/utils/request'
+import prefixName from "./prefixName"
+import qs from "qs"
 
-export function login(username, password) {
+export function login(username,password) {
+  let data={
+    grant_type: 'password',
+    client_id: 'client-app',
+    client_secret: '123456',
+    username,
+    password
+  }
   return request({
-    url: '/admin/login',
+  url: '/auth/oauth/token',
     method: 'post',
-    data: {
-      username,
-      password
+    data: qs.stringify(data),
+  
+    //在浏览器中是以 formData方式发送数据,即进行url编码
+    headers:{
+      'Content-type': 'application/x-www-form-urlencoded'
     }
+
   })
+ 
 }
 
 export function getInfo() {
   return request({
-    url: '/admin/info',
+    //url: prefixName.userService+ '/user/user/info',
+  //  url: prefixName.userService+ 'admin/admin/user/info',
+    url: prefixName.userService+ '/user/infoTest',
     method: 'get',
   })
 }
+
+// export function getInfo() {
+//   return request({
+//     url: '/admin/info',
+//     method: 'get',
+//   })
+// }
 
 export function logout() {
   return request({

@@ -27,6 +27,7 @@
                 />  
                  <van-field
                     :value="returnApply.reason"
+                    @input="onReason"
                     label="原因"
                     placeholder="请输入原因"
                       :disabled="returnApply.disabled"
@@ -47,6 +48,7 @@
 
 <script>
 import {selectOrderReturnApply,generateOrderReturnApply} from "@/api/returnApply"
+import {selectOrderById} from "@/api/order"
 export default {
 
     data(){
@@ -60,13 +62,20 @@ export default {
       //是,获取returnAppy值并且 把disabled设置true
        let edit = this.$route.query.edit;
        this.returnApply.disabled=true;
-       console.log("edit:"+edit)
-       if(edit==='true'){
+       console.log("edit:"+typeof(edit) )
+       if(edit){
           console.log("enter edit")
+          this.returnApply=JSON.parse(this.$route.query.params) ;
+        //   console.log("returnApply type:"+typeof(this.returnApply))
+          console.log("returnApply:"+JSON.stringify(this.returnApply) )
           this.returnApply.disabled=false;
+          this.returnApply.reason=""
+         
+       }else{
+           this.getReturnApply();
        }
         console.log("disabled:"+this.returnApply.disabled)
-      this.getReturnApply();
+     
      
     },
     methods:{
@@ -79,14 +88,22 @@ export default {
       submit:function(){
            this.returnApply.orderId=this.$route.query.id
             this.returnApply.status=0
-        generateOrderReturnApply(returnApply).then(resp=>{
+            console.log("submit return apply:"+JSON.stringify(this.returnApply))
+        generateOrderReturnApply(this.returnApply).then(resp=>{
             if(resp.code==200){
                 //成功
                 this.$router.push({path:'/user/order/info/'+this.$route.query.id})
             }else{
                 //失败
+                this.$toast("申请失败")
             }
         })
+      },
+      onReason(e){
+          //注意.这里主要解决vant-field不能双向绑定的问题
+        //   console.log("listen reson")
+        //     console.log("e:"+JSON.stringify(e) )
+          this.returnApply.reason=e
       }
     }
 }

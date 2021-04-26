@@ -27,6 +27,7 @@
         label="留言"
         type="textarea"
         placeholder="请输入留言"
+        :value="confirmOrder.extra_info"
         rows="1"
         autosize
       />
@@ -46,10 +47,10 @@
 
     <div style="height:50px;"></div>
     <van-submit-bar
-      :price="confirmOrder.payAmount"
+      :price="confirmOrder.payAmount | formatePrice"
       button-text="提交订单"
       label='实付金额：'
-      @submit="onSubmit"
+      @submit="onSubmitForPay"
     />
 
      <!-- <van-popup
@@ -76,11 +77,9 @@
           :payStatus="payStatus" 
           :payTitle = "payTitle"
           @paySubmit="submitFns" 
-          @payClose="payShow=false"
+          @payClose="payCloseClick"
      >
-
-    
-</payment>
+     </payment>
   
    
   </div>
@@ -89,7 +88,8 @@
 
 
 <script>
-import {generateConfirmOrder,generateOrder} from "@/api/order"
+import {generateConfirmOrderByCartIds,generateConfirmOrderByGoodProperty,
+       generateOrder} from "@/api/order"
 import {selectDefaultByUserId} from "@/api/userAdress"
 import {fetchAvailabelList} from "@/api/coupon"
 import eventBus from '@/utils/eventbus.js';
@@ -158,31 +158,46 @@ export default {
       payTitle:"请输入支付密码",
       userAddress:{},
       couponList:[],
-      popupShow:false
+      popupShow:false,
+      seletedCoupon:null
       // seletedCoupon:{}
     };
   },
   computed:{
-    seletedCoupon:{
-       get(){//回调函数 当需要读取当前属性值是执行，根据相关数据计算并返回当前属性的值
+    // seletedCoupon:{
+    //    get(){//回调函数 当需要读取当前属性值是执行，根据相关数据计算并返回当前属性的值
          
-       },
-      set(val){//监视当前属性值的变化，当属性值发生变化时执行，更新相关的属性数据
-       //val就是fullName的最新属性值
-        console.log("set seletedCoupon:"+val)
-        let amount;
-        if(val==null){
+    //    },
+    //   set(val){//监视当前属性值的变化，当属性值发生变化时执行，更新相关的属性数据
+    //    //val就是fullName的最新属性值
+    //     console.log("set seletedCoupon:"+val)
+    //     let amount;
+    //     if(val==null){
+    //       amount=0;
+    //     }else{
+    //       amount=val.amount;
+    //     }
+    //     this.confirmOrder.couponAmount=amount;
+    //     this.confirmOrder.payAmount=this.confirmOrder.totalAmount+this.confirmOrder.freightAmount-amount
+    //     // const names = val.split(' ');
+    //     // console.log(names)
+    //     // this.firstName = names[0];
+    //     // this.lastName = names[1];
+    //   }
+    // }
+  },
+  watch:{
+    seletedCoupon:function(){
+         let amount;
+        if(this.seletedCoupon==null){
           amount=0;
         }else{
-          amount=val.amount;
+          amount=this.seletedCoupon.amount;
         }
+        console.log("amount:"+amount)
         this.confirmOrder.couponAmount=amount;
         this.confirmOrder.payAmount=this.confirmOrder.totalAmount+this.confirmOrder.freightAmount-amount
-        // const names = val.split(' ');
-        // console.log(names)
-        // this.firstName = names[0];
-        // this.lastName = names[1];
-      }
+        
     }
   },
   created(){
@@ -195,58 +210,90 @@ export default {
     //     this.userAddress=data;
     //     this.$Toast("返回值")
     // }.bind(this));
-  //  this.generateConfirmFormCart();
+     console.log("cartIds:"+this.$route.query.cateIds)
+     console.log("params:"+this.$route.query.params)
+    
+   this.generateConfirmFormCart();
     
 
   },
   filters: {
     formateCoupon: function (value) {
-       console.log("formateCoupon:"+value)
-        //  return "你好"
-      if (!value) return '无可用优惠劵'
-       value="满"+value.minPoint+"减"+value.amount;
-       console.log("value:"+value)
-      // value = value.toString()
-      // return value.charAt(0).toUpperCase() + value.slice(1)
-      return value
+       console.log("formateCoupon:"+JSON.stringify(value) )
+     
+      if (!value) {
+          console.log("value:"+"无可用优惠劵")
+          return '无可用优惠劵'
+      }else{
+           
+           console.log("value:"+value)
+             value="满"+value.minPoint+"减"+value.amount;
+            return value
+      }   
+     
+    },
+    formatePrice: function(value){
+      return value*100
     }
+    
   },
   methods: {
-    onSubmit() {
+
+    onSubmitForPay(){
+        this.payShow=true;
+    },
+    onSubmit(payStatus) {
       //根据普通的订单还是秒杀订单
       //目前测试暂时预设环境: 购物车,正常购物,支付成功
       
       // this.$toast("点击按钮");
-      // this.payShow=true;
-      this.confirmOrder.payStatus=this.payStatus
-      this.confirmOrder.payType="手机"
+      let userId=this.$store.getters.userId
+      let cateIds=this.$route.query.cateIds==undefined?null:this.$route.query.cateIds
+      let couponHistoryId = this.seletedCoupon==null?null:this.seletedCoupon.couponHistoryId
+      console.log("commit paystatus:"+payStatus)
+      this.confirmOrder.payStatus=payStatus
+      this.confirmOrder.payType=0
       this.confirmOrder.payTime=new Date()
-      this.confirmOrder.orderStatus=1
+      this.confirmOrder.orderStatus=payStatus
       this.confirmOrder.orderAddressId=this.userAddress.addressId
-      this.confirmOrder.userId=4
-      this.confirmOrder.shopCateIds=this.$route.query.cateIds
-      this.confirmOrder.couponHistoryId=this.seletedCoupon.couponHistoryId
+      this.confirmOrder.userId=userId
+      this.confirmOrder.couponHistoryId=couponHistoryId
       console.log("confirmOrder:"+JSON.stringify(this.confirmOrder))
       generateOrder(this.confirmOrder).then(resp=>{
            
            //判断是否成功,成功,则跳转到订单跳转页面
+           if(resp.code==200){
+             //成功
+             //根据支付状态跳转到相应的订单页面
+             if(payStatus==0){
+               //未支付
+                this.$router.push("/user/order/1")
+             }else{
+                this.$router.push("/user/order/2")
+             }
+           }else{
+             this.$toast("生成订单失败")
+           }
            
       })
     },
     generateConfirmFormCart(){
 
-    
-       let params={
-         cartIds:this.$route.query.cateIds
-       }
-       generateConfirmOrder(params).then(resp=>{
+       let params={}
+       
+      if(this.$route.query.cateIds!=undefined){
+         params.cartIds=this.$route.query.cateIds
+         generateConfirmOrderByCartIds(params).then(resp=>{
+           if(resp.data==null){
+               this.$toast("无法生成订单")
+           }
            this.confirmOrder = resp.data;
+           console.log("confirmOrder:"+JSON.stringify(this.confirmOrder))
            let data = this.confirmOrder.mallOrderItems
            this.products=[]
            for(let i=0;i<data.length;i++){
               let value={
-                  imageURL:
-                       "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
+                  imageURL:data[i].goodsCoverImg,
                   title: data[i].goodsName,
                   desc: data[i].goodsInfo,
                   price: data[i].sellingPrice,
@@ -255,8 +302,74 @@ export default {
               this.products.push(value)
            }
           this.confirmOrder.freightAmount=0.0
+             this.confirmOrder.couponAmount=0
+         this.confirmOrder.payAmount=this.confirmOrder.totalAmount+this.confirmOrder.freightAmount- this.confirmOrder.couponAmount
           this.getUserCouponAvaibleList();
        })
+
+      }else if(this.$route.query.params!=undefined&&this.$route.query.isSecond==false){
+          params=this.$route.query.params
+          console.log("goodProperty:"+JSON.stringify(params))
+           generateConfirmOrderByGoodProperty(params).then(resp=>{
+              if(resp.data==null){
+               this.$toast("无法生成订单")
+              }
+           this.confirmOrder = resp.data;
+           let data = this.confirmOrder.mallOrderItems
+           this.products=[]
+           for(let i=0;i<data.length;i++){
+              let value={
+                  // imageURL:
+                  //      "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
+                   imageURL:data[i].goodsCoverImg,
+                  title: data[i].goodsName,
+                  desc: data[i].goodsInfo,
+                  price: data[i].sellingPrice,
+                  quantity: data[i].goodsCount
+              }
+              this.products.push(value)
+           }
+          this.confirmOrder.freightAmount=0.0
+          this.confirmOrder.couponAmount=0
+          this.confirmOrder.payAmount=this.confirmOrder.totalAmount+this.confirmOrder.freightAmount- this.confirmOrder.couponAmount
+          this.getUserCouponAvaibleList();
+       })
+       }else  if(this.$route.query.params!=undefined&&this.$route.query.isSecond==true){
+            params=this.$route.query.params
+          console.log("goodProperty:"+JSON.stringify(params))
+           //这里暂时不换,如果要切换为秒杀,再进行切换
+           generateConfirmOrderByGoodProperty(params).then(resp=>{
+              if(resp.data==null){
+               this.$toast("无法生成订单")
+              }
+           this.confirmOrder = resp.data;
+           let data = this.confirmOrder.mallOrderItems
+           this.products=[]
+           for(let i=0;i<data.length;i++){
+              let value={
+                  // imageURL:
+                  //      "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
+                   imageURL:data[i].goodsCoverImg,
+                  title: data[i].goodsName,
+                  desc: data[i].goodsInfo,
+                  price: data[i].sellingPrice,
+                  quantity: data[i].goodsCount
+              }
+              this.products.push(value)
+           }
+          this.confirmOrder.freightAmount=0.0
+          this.confirmOrder.couponAmount=0
+          this.confirmOrder.payAmount=this.confirmOrder.totalAmount+this.confirmOrder.freightAmount- this.confirmOrder.couponAmount
+          this.getUserCouponAvaibleList();
+       })
+       }else{
+           this.$$toast("错误")
+       }
+
+       
+
+      
+       
     },
     generateConfirmFormDetail(){
         
@@ -264,6 +377,19 @@ export default {
     payClick:function(){
         // 显示支付键盘
         this.payShow = true;
+    },
+    payCloseClick(){
+       this.payShow = false;
+        console.log("关闭支付键盘")  
+      // setTimeout(function(_this){
+      //           _this.payStatus = false;
+      //             this.payShow = false;
+      //           // _this.$toast("支付成功");
+               
+      //           _this.onSubmit(0)
+      //           console.log("未支付")  
+      // },100,this)
+
     },
     submitFns:function(value){
         // 关闭键盘
@@ -273,7 +399,8 @@ export default {
             setTimeout(function(_this){
                 _this.payStatus = true;
                 // _this.$toast("支付成功");
-                _this.onSubmit()
+               
+                _this.onSubmit(1)
                 console.log("支付成功")  
             },100,this)
             // console.log("支付成功")  
@@ -282,12 +409,13 @@ export default {
             // 密码错误
             setTimeout(function(_this){
                 _this.payStatus = false;
-                // this.$toast("支付失败");
+                 _this.onSubmit(0)
+                this.$toast("支付失败");
             },100,this)
         }
     },
     getUserDefaultAddress(){
-       let userId =4 
+       let userId =this.$store.getters.userId 
        selectDefaultByUserId(userId).then(resp=>{
             this.userAddress=resp.data
             if(this.userAddress==null){
@@ -308,7 +436,7 @@ export default {
     getUserCouponAvaibleList(){
       let count = this.confirmOrder.totalAmount
       // let count = 10000
-      let userId= 4
+      let userId= this.$store.getters.userId
       let params={
         pageNum:1,
         pageSize:100,
@@ -328,7 +456,10 @@ export default {
           }
           console.log("couponList:"+JSON.stringify(this.couponList))
           this.couponList= this.couponList.sort(compare('amount'))
-          this.seletedCoupon=this.couponList[0]
+          if(this.couponList!=null&&this.couponList.length>0){
+               this.seletedCoupon=this.couponList[0]
+          }
+          
         }
       )
            

@@ -73,8 +73,8 @@ export default {
 
           //添加优惠卷和秒杀活动的icon
          
-          this.quicknavlist.push({label: "优惠卷", value: -1, icon:"http://mall-photo.oss-cn-beijing.aliyuncs.com/%E4%BC%98%E6%83%A0%E5%8D%B7.png"});
-           this.quicknavlist.push({label: "秒杀活动", value: -2, icon:"http://mall-photo.oss-cn-beijing.aliyuncs.com/%E6%B4%BB%E5%8A%A8.png"});
+          this.quicknavlist.push({label: "优惠卷", value: -1, icon:"http://mall-photo.oss-cn-beijing.aliyuncs.com/%E4%BC%98%E6%83%A0%E5%8D%B7.png",url:"/home/coupon"});
+           this.quicknavlist.push({label: "秒杀活动", value: -2, icon:"http://mall-photo.oss-cn-beijing.aliyuncs.com/%E6%B4%BB%E5%8A%A8.png",url:"/home/second"});
           });
           
           

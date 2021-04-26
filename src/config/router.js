@@ -17,6 +17,20 @@ const routes = [
     }
   },
   {
+    path: '/home/coupon',
+    component: () => import('../page/home/coupon/list'),
+    meta: {
+      title: '领取优惠券'
+    }
+  },
+  {
+    path: '/home/second',
+    component: () => import('../page/home/second/list'),
+    meta: {
+      title: '秒杀活动'
+    }
+  },
+  {
 		path: '/login',
     component: () => import('../page/account/login'),
     meta: {

@@ -29,7 +29,38 @@
 
 <script>
 export default {
-
+   data(){
+    return{
+      loginForm:{}
+    }
+  },
+  created(){
+        // Message.info("process.env.BASE_API:"+process.env.BASE_API)
+        // Message.info("process.env.NODE_ENV:"+process.env.NODE_ENV)
+     
+  },
+  methods:{
+    onUsername(e){
+     this.loginForm.username=e
+    },
+    onPassword(e){
+      this.loginForm.password=e
+    },
+    loginConfirm(){
+       
+       //发送登录请求
+        store.dispatch('Login').then((resp,error)=>{
+            if(error!=null){
+               //登录失败
+               this.$toast(JSON.stringify(error))
+            }else{
+              //登录成功
+               this.$toast("登录成功")
+               this.router.push("/home")
+            }
+        })
+    }
+  }
 }
 </script>
 

@@ -187,7 +187,7 @@ export default {
                 pageSize:5,
                 useStatus:0
             }
-            let userId=4;
+            let userId=this.$store.getters.userId;
             fetchList(userId,params).then(resp=>{
                 let data = resp.data.list;
                 this.list=[]
@@ -237,7 +237,7 @@ export default {
                 pageSize:5,
                 useStatus:1
             }
-            let userId=4;
+            let userId=this.$store.getters.userId;
             fetchList(userId,params).then(resp=>{
                 let data = resp.data.list;
                 this.useList=[]
@@ -278,7 +278,7 @@ export default {
                 pageSize:5,
                 useStatus:2
             }
-            let userId=4;
+            let userId=this.$store.getters.userId;
             fetchList(userId,params).then(resp=>{
                 let data = resp.data.list;
                 this.endList=[]

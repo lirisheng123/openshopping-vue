@@ -58,7 +58,7 @@ export default {
         // if(this.$route.query.id==2){
         //     this.isSelect=true;
         // }
-        let userId =4
+        let userId =this.$store.getters.userId
         fetchList(userId).then(response=>{
             let data=response.data;
             for(let i=0;i<data.length;i++){

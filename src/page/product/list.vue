@@ -2,7 +2,7 @@
     <div class="product-list">
         <!-- <searchtop @change"GetProducts"= /> -->
        <van-search
-        v-model="value"
+        v-model="keyword"
         placeholder="请输入搜索关键词"
         show-action
         @search="onSearch"
@@ -12,29 +12,33 @@
   
         <div class="filterbar">
             <ul :class="filtersort?'show':''">
-                <li :class="filterindex==0?'selected':''" v-on:click="onFilterBar(0)"><span>{{filterindex==11?'价格最低':(filterindex==12?'价格最高':'综合')}}</span><van-icon name="arrow" class="down" /></li>
-                <li :class="filterindex==1?'selected':''" v-on:click="onFilterBar(1)"><span>销量</span></li>
-                <li :class="filterindex==2?'selected':''" v-on:click="onFilterBar(2)"><span>上新</span></li>
-                <li :class="filterindex==3?'selected':''" v-on:click="onFilterBar(3)"><span>筛选</span></li>
+                <li :class="filterindex==0?'selected':''" v-on:click="onFilterBar(0)"><span>{{filterindex==3?'价格最低':(filterindex==4?'价格最高':'综合')}}</span><van-icon name="arrow" class="down" /></li>
+                <li :class="filterindex==2?'selected':''" v-on:click="onFilterBar(2)"><span>销量</span></li>
+                <li :class="filterindex==1?'selected':''" v-on:click="onFilterBar(1)"><span>上新</span></li>
+                <li :class="filterindex==5?'selected':''" v-on:click="onFilterBar(5)"><span>筛选</span></li>
             </ul>
             <div :class="'item_options '+(filtersort?'show':'')">
                 <ul>
-                    <li :class="filterindex==10?'selected':''" v-on:click="onFilterBar(10)">综合</li>
-                    <li :class="filterindex==11?'selected':''"  v-on:click="onFilterBar(11)">价格最低</li>
-                    <li :class="filterindex==12?'selected':''" v-on:click="onFilterBar(12)">价格最高</li>
+                    <!-- <li :class="filterindex==10?'selected':''" v-on:click="onFilterBar(10)">综合</li> -->
+                    <li :class="filterindex==3?'selected':''"  v-on:click="onFilterBar(3)">价格最低</li>
+                    <li :class="filterindex==4?'selected':''" v-on:click="onFilterBar(4)">价格最高</li>
                 </ul>
             </div>
             <van-popup v-model="filtershow" position="right" class="filterlayer" >
                 <div class="filterInner" style="overflow-y: scroll;max-height: 100%;">
-                  <ul  v-for="(item,index) in list" :key="index">
+                  <ul  v-for="(item,index) in filterList" :key="index">
                         <li>
                            <van-cell :title="item.title" is-link  />
                         </li>
                         <div style="clear: both;"></div>
-                        <div class="tags_selection">
-                            <el-checkbox-group v-model="item.checkerValue">
-                               <el-checkbox-button   v-for=" (item,index) in item.options" :label="item.value" :key="index">{{item.text}}</el-checkbox-button>
-                            </el-checkbox-group>
+                        <div class="tags_selection" >
+                         
+                            <!-- <el-checkbox-group v-model="item.checkerValue">                           
+                               <el-checkbox-button   v-for=" (item1,index1) in options" :label="item1.value" :key="index1">{{item1.text}}</el-checkbox-button>
+                            </el-checkbox-group> -->
+                               <el-checkbox-group v-model="item.checkerValue">
+                                   <el-checkbox-button v-for=" (item1,index1) in item.options" :label="item1.value" :key="index1">{{item1.text}}</el-checkbox-button>
+                                  </el-checkbox-group>
                            <div style="clear: both;"></div>
                         </div>
                   </ul>
@@ -190,11 +194,24 @@
                 </div>
             </van-popup>
         </div>
-        <div v-for="(product,i) in products" :key="i">
+          <van-list
+                            v-model="loading"
+                            :finished="finished"
+                            :offset="offset"
+                            finished-text="没有更多了"
+                            @load="onLoad"
+                            >
+            <div v-for="(product,i) in products" :key="i">
+              <div  @click="showProduct(product)">
+                  <product-card :product='product' />
+              </div>
+            </div>
+          </van-list>
+        <!-- <div v-for="(product,i) in products" :key="i">
            <div  @click="showProduct(product)">
               <product-card :product='product' />
            </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -204,8 +221,18 @@ import searchtop from "../../components/search/searchtop";
 import {fetchList } from "@/api/product";
 import { Search } from "vant";
 import { fetchBrandListByCateId,fetchParamsByCateId } from "@/api/productCate";
-// import{Checker} from 'Cube'
+import { fetchProductList ,aggregationByKeyword} from "@/api/search";
 
+// import{Checker} from 'Cube'
+let defaultQuerysData={   
+          "brandId": null,
+          "keyword": null,
+          "pageNum": 1,
+          "pageSize": 20,
+          "productCategoryId": null,
+          "productParams":null,
+          "sort": 3
+}
 export default {
   // components: {
   //   searchtop
@@ -217,7 +244,7 @@ export default {
   data() {
     return {
       value: "",
-      filterindex: 0,
+      filterindex: 2,
       filtersort: false,
       filtershow: false,
       value:"",
@@ -265,11 +292,15 @@ export default {
           text: 'green'
         }
       ]
-      }]
-
+      }],
       
-    
-      
+      filterList:[],
+      keyword:null,
+      offset:10,
+      finished:false,
+      loading:false,
+      page:0
+     
             // products:[
             //     {
             //         id:1,
@@ -317,18 +348,29 @@ export default {
   },
   created() {
       console.log("进入search")
-      this.getSearchProductList();
+      console.log("keyword:",this.$route.query.keyword)
+      console.log("categoryId:",this.$route.query.categoryId)
+      console.log("filterindex:",this.filterindex)
+       this.keyword=this.$route.query.keyword=="null"?null:this.$route.query.keyword
+      // this.getSearchProductList();
+     
       // this.getAllRoleList();
     },
   methods: {
     onFilterBar(value) {
       if (value == 0) {
         this.filtersort = !this.filtersort;
-      } else if (value == 3) {
+      } else if (value == 5) {
         this.filtershow = !this.filtershow;
       } else {
         this.filtersort = false;
         this.filterindex = value;
+        if(this.filterindex==1||this.filterindex==2||
+           this.filterindex==3||this.filterindex==4)  {
+              this.page=0;
+             this.finished=false
+             this.getSearchProductList()
+        }
       }
     },
     showProduct(product){ 
@@ -336,23 +378,48 @@ export default {
         this.$router.push('/product/'+product.id);
     },
     getSearchProductList(){
-      let keyword=""
-      if(this.$route.query.keyword=='null'){
-        keyword=null
+     
+      let params={   
+          
+          "pageNum": this.page,
+          "pageSize": 10,
+          "sort": this.filterindex
+      }
+
+      if(this.keyword!=null){
+           params.keyword=this.keyword
       }else{
-        keyword=this.$route.query.keyword
+          params.productCategoryId=[]
+           params.productCategoryId.push(parseInt(this.$route.query.categoryId) )
       }
-      let params={
-        goodsName:keyword,
-        goodsCategoryId:this.$route.query.categoryId,
-        pageNum:1,
-        pageSize:100,
-        goodsId:null,
-        goodsSellStatus:null
+      // if(this.$route.query.categoryId!='null'){
+      //      params.productCategoryId=[]
+      //      params.productCategoryId.push(parseInt(this.$route.query.categoryId) )
+      // }
+    
+      if(this.filterList!=null&&this.filterList.length>0){
+             this.chageFilterListToData(params)
       }
+      // let keyword=""
+      // if(this.$route.query.keyword=='null'){
+      //   keyword=null
+      // }else{
+      //   keyword=this.$route.query.keyword
+      // }
+
+      // let params={
+      //   goodsName:keyword,
+      //   goodsCategoryId:this.$route.query.categoryId,
+      //   pageNum:1,
+      //   pageSize:100,
+      //   goodsId:null,
+      //   goodsSellStatus:null
+      // }
        console.log("params:"+JSON.stringify(params) )
-       this.products=[]
-       fetchList(params).then(response => {
+       if(this.page==0){
+            this.products=[]
+       }
+       fetchProductList(params).then(response => {
             console.log("resp:"+JSON.stringify(response) )
              let list=response.data.list;
              for(let i=0;i< list.length;i++){
@@ -364,41 +431,59 @@ export default {
                }
                this.products.push(product)
              }
+               console.log("total;"+ response.data.totalPage)
+             this.loading=false
+            if( response.data.totalPage-1<=this.page){
+                  this.finished = true;
+            }
+            if(this.page==0){
+                this.getFilterList()
+            }
+            this.page=this.page + 1;
+
+           
        })
 
     },
     onSearch() {
-       let params={
-        goodsName:this.value,
-        goodsCategoryId:null,
-        pageNum:1,
-        pageSize:100,
-        goodsId:null,
-        goodsSellStatus:null
-      }
-       console.log("params:"+JSON.stringify(params) )
-       this.products=[]
-       fetchList(params).then(response => {
-            console.log("resp:"+JSON.stringify(response) )
-             let list=response.data.list;
-             for(let i=0;i< list.length;i++){
-               let product={
-                 id: list[i].goodsId,
-                 imageURL: list[i].goodsCoverImg,
-                // imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
-                 title: list[i].goodsName,
-                 price: list[i].sellingPrice
-               }
-               this.products.push(product)
-             }
-       })
+      this.page=1;
+      this.finished=false
+      this.getSearchProductList();
+      //  let params={
+      //   goodsName:this.value,
+      //   goodsCategoryId:null,
+      //   pageNum:1,
+      //   pageSize:100,
+      //   goodsId:null,
+      //   goodsSellStatus:null
+      // }
+      //  console.log("params:"+JSON.stringify(params) )
+      //  this.products=[]
+      //  fetchList(params).then(response => {
+      //       console.log("resp:"+JSON.stringify(response) )
+      //        let list=response.data.list;
+      //        for(let i=0;i< list.length;i++){
+      //          let product={
+      //            id: list[i].goodsId,
+      //            imageURL: list[i].goodsCoverImg,
+      //           // imageURL:'https://pop.nosdn.127.net/19e33c9b-6c22-4a4b-96da-1cb7afb32712',
+      //            title: list[i].goodsName,
+      //            price: list[i].sellingPrice
+      //          }
+      //          this.products.push(product)
+      //        }
+      //  })
 
     },
     getBrandList(){
-     
+       
        fetchBrandListByCateId(this.$route.query.categoryId).then(resp=>{
             let data = resp.data;
+            console.log("brand:"+JSON.stringify(data))
             let value=[]
+            if(data==null){
+              return 
+            }
             for(let i=0;i<data.length;i++){
                 
                 let value1 = {
@@ -409,18 +494,24 @@ export default {
                 value.push(value1)
               
             }
-              this.list.push({title:"品牌",options:value})
+            this.filterList.push({title:"品牌",options:value,checkerValue:[]})
+            console.log("filterListbrand:"+JSON.stringify(this.filterList))
+
            
        })
     },
     getParamList(){
          fetchParamsByCateId(this.$route.query.categoryId).then(resp=>{
             let data = resp.data;
-            
+             console.log("Params:"+JSON.stringify(data))
+            if(data==null){
+              return 
+            }
             for(let i=0;i<data.length;i++){
                 
                 let value={
-                  title:data[i].categoryParamName
+                  title:data[i].categoryParamName,
+                  checkerValue:[]
                 }
                 let value2  =data[i].categoryParamValue.split(",")
                 let value3=[]
@@ -432,13 +523,177 @@ export default {
                     value3.push(value4)
                 }
                 value.options=value3;
-                this.list.push(value)
+                this.filterList.push(value)
             }
+            console.log("filterListParam:"+JSON.stringify(this.filterList))
+            
        })
     },
     confirmSelect(){
-       console.log("checkerValue:"+JSON.stringify(this.checkerValue))
-    }
+      
+      //  console.log("checkerValue:"+JSON.stringify(this.checkerValue))
+      this.page=0;
+      this.finished=false
+      this.getSearchProductList()
+      this.filtershow=false
+    },
+    getFilterList(){
+      //判断来源,是分类还是keyword
+      this.filterList=[]
+      if(this.keyword!=null) {
+        let params={
+          keyword:this.keyword
+        }
+        aggregationByKeyword(params).then(resp=>{
+             console.log("aggregations:"+JSON.stringify(resp.data))
+             if(resp.data !=null){
+                if(resp.data.productGrands!=null&&resp.data.productGrands.length>0){
+                   let value={
+                     title:"品牌",
+                     options:[],
+                    checkerValue:[]
+                   }
+                   value.options=resp.data.productGrands.map(item=>{
+                     return {
+                       text:  item.grandName,
+                       value: item.grandId
+                     }
+                   })
+                  this.filterList.push(value) 
+                }
+                if(resp.data.productCategorys!=null&&resp.data.productCategorys.length>0){
+                     let value={
+                     title:"分类",
+                     options:[],
+                     checkerValue:[]
+                   }
+                   value.options=resp.data.productCategorys.map(item=>{
+                     return {
+                       text:  item.categoryName,
+                       value: item.goodsCategoryId
+                     }
+                   })
+                   this.filterList.push(value) 
+                }
+                if(resp.data.productParams!=null&&resp.data.productParams.length>0){
+                   
+                   resp.data.productParams.forEach(item=>{
+                      let value={
+                        title:item.goodsParamName,
+                        options:[],
+                         checkerValue:[]
+                      }
+                     value.options=item.goodsParamValue.map(item1=>{
+                       return {
+                         text:item1,
+                        value: item1
+                       }
+                     })
+                      this.filterList.push(value) 
+                    
+                   })
+                  
+                }
+             }
+
+             console.log("filterList:"+JSON.stringify(this.filterList))
+          })
+      }else{
+       
+      //  let vm =this
+      //   let P1 = new Promise(function (resolve, reject) {
+      //         vm.getBrandList(function () {
+      //               resolve()
+      //         })
+      //   })
+      //   let P2 = new Promise(function (resolve, reject) {
+      //      vm.getParamList(function () {
+      //       resolve()
+      //     })
+      //   })
+        
+      //   Promise.all([P1, P2]).then(function (results) {
+      //      console.log("filterList:"+JSON.stringify(this.filterList))
+      //     // ["p1 data", ""p2 data""]
+      //   })
+
+         this.getBrandList()
+         this.getParamList()   
+        //  console.log("filterList:"+JSON.stringify(this.filterList))
+      }
+
+      
+    },
+    chageFilterListToData(queryData){
+      
+      this.filterList.forEach(item=>{
+        
+        if(item.checkerValue!=null&&item.checkerValue.length>0){
+              if(item.title=="品牌"){
+                // queryData.brandId=[]
+                 queryData.brandId= item.checkerValue;
+              //  queryData.brandId= item.checkerValue.map(item1=>{
+              //     return  item1
+              //   })
+                // queryData.brandId=queryData.brandId.concat(value)
+
+              }else if(item.title=="分类"){
+                // queryData.productCategoryId=[]
+                 queryData.productCategoryId= item.checkerValue
+                // queryData.productCategoryId= item.checkerValue.map(item1=>{
+                //   return  item1
+                // })
+                // queryData.productCategoryId=queryData.productCategoryId.concat(value)
+                
+              }else{
+                //参数
+                if(queryData.productParams==undefined){
+                    queryData.productParams=[]
+                }
+                // queryData.productParams=[]
+                let value={
+                   "goodsParamName":  item.title,
+                   "goodsParamValue":item.checkerValue
+                }
+                queryData.productParams.push(value)
+                // let value1 = item.checkerValue.map(item1=>{
+                //   return  {      
+                //       "goodsParamValue": item1
+                //   }
+                // })
+
+
+                // queryData.productParams=queryData.productParams.concat(value)
+              }
+        }
+        
+      })
+    },
+    onLoad() {
+            
+            // this.loading=true
+            // GetCoupon({page:this.page}).then(response=>{
+            //     response.List.forEach(item => {
+            //         item.show=false;
+            //         this.list.push(item);
+            //     });
+            //     this.loading = false;
+            //     if(response.TotalPage<=this.page){
+            //         this.finished = true;
+            //     }
+            
+            // })
+            // this.loading=true
+            // this.loading=true
+            //  let timer = setTimeout(() => {	// 定时器仅针对本地数据渲染动画效果,项目中axios请求不需要定时器
+            //    this.page=this.page + 1;
+            //   this.getSearchProductList();				// 调用上面方法,请求数据
+            //   this.finished && clearTimeout(timer);//清除计时器
+            // }, 100);
+
+           this.getSearchProductList();
+         
+      },
    
 
   }

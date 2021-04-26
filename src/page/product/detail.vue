@@ -9,17 +9,19 @@
 
     <van-cell-group>
       <van-cell>
-        <span class="goods-price">{{ formatPrice(goods.price) }}</span>
-        <span class="goods-market-price">{{ formatPrice(goods.market_price) }}</span>
+        <span class="goods-price">{{ goods.price }}</span>
+        <!-- <span class="goods-market-price">{{ formatPrice(goods.market_price) }}</span> -->
+        <!-- <span class="goods-price">{{ formatPrice(goods.price) }}</span>
+        <span class="goods-market-price">{{ formatPrice(goods.market_price) }}</span> -->
         <div class="goods-title">{{ goods.title }}</div>
         <div class="goods-subtit">{{goods.subtitle}}</div>
       </van-cell>
       
       <van-cell   @click="onClickShowTag" class="goods-tag" >
         <template slot="title" style="font-size:10px;">
-            <img src="https://haitao.nos.netease.com/ba8a4c2fdaa54f82a45261293c116af61419663676663i46n3jlh10028.png"/>
+            <!-- <img src="https://haitao.nos.netease.com/ba8a4c2fdaa54f82a45261293c116af61419663676663i46n3jlh10028.png"/>
             <span >挪威品牌</span>
-            <img src="https://haitao.nosdn2.127.net/13bd59e6e29a4f06b278c586629e690d.png" />
+            <img src="https://haitao.nosdn2.127.net/13bd59e6e29a4f06b278c586629e690d.png" /> -->
             <span >跨境商品</span>
             <van-icon name="passed" color="red" />
             <span >次日达</span>
@@ -58,7 +60,7 @@
       <van-cell  is-link @click="showSku" >
         <template slot="title">
             <span style="margin-right: 10px;">已选</span>
-            <span >10件装</span>
+            <span >选择商品</span>
         </template>
       </van-cell>
       
@@ -153,7 +155,7 @@
           :quota-used="skuData.quota_used"
           reset-stepper-on-hide
           reset-selected-sku-on-hide
-          disable-stepper-input
+           disable-stepper-input
           :close-on-click-overlay="closeOnClickOverlay"
           :message-config="messageConfig"
           :custom-sku-validator="customSkuValidator"
@@ -165,10 +167,12 @@
 
 <script>
 import skuData from '../../data/sku';
-  import {fetchList as fetchSkuStockList,update as updateSkuStockList} from '@/api/skuStock'
-  import {fetchList as fetchProductAttrList} from '@/api/goodPropertyRelate'
-    import {getProduct as fetchProductList} from '@/api/product' 
-    import {createShoppingCart} from "@/api/shoppingCart"
+import {fetchList as fetchSkuStockList,update as updateSkuStockList} from '@/api/skuStock'
+import {fetchList as fetchProductAttrList} from '@/api/goodPropertyRelate'
+import {getProduct as fetchProductList} from '@/api/product' 
+import {createShoppingCart} from "@/api/shoppingCart"
+import { selectById,fetchList} from "@/api/flash";
+import {fetchList as fetchSecondPropertyList} from "@/api/flashProductRelation";
 export default {
   components: {
   },
@@ -180,6 +184,7 @@ export default {
       show:false,
       showTag:false,
       goods:{},
+     
       // goods: {
       //   title: '【每日一粒益智又长高】 Lifeline Care 儿童果冻鱼油DHA维生素D3聪明长高 软糖 30粒 2件装',
       //   subtitle:'【品牌直采】Q弹美味，无腥味果冻鱼油，每粒含足量鱼油DHA，帮助视网膜和大脑健康发育，让你的宝宝明眼又聪明，同时补充400国际单位维生素D3，强壮骨骼和牙齿。特含DPA，让宝宝免疫力更强，没病来扰。',
@@ -231,11 +236,22 @@ export default {
           });
         },
         uploadMaxSize: 3
-      }
+      },
+      isSecond:false
     };
   },
   created(){
-    this.getProductDetail();
+    //判断是否为为秒杀
+    if(this.$route.query.second!=undefined&&this.$route.query.second!=null){
+        //为秒杀
+        this.isSecond=true
+        this.getSecondProductDetail()
+    }else{
+      //不为秒杀
+        this.isSecond=false
+      this.getProductDetail();
+    }
+    
     // this.getSkuData();
   },
   methods: {
@@ -258,29 +274,69 @@ export default {
         this.showTag=true;
     },
     onBuyClicked(data) {
+      //直接购买
+      //判断是否登录
+      if(this.$store.getters.token==undefined||this.$store.getters.token==null||this.$store.getters.token==''){
+       //没登录
+         this.$router.push("/login")
+         return
+       }
+
+    
       this.$toast(JSON.stringify(data));
+       //携带着商品信息跳转到订单页面
+       let params = {
+         	
+            "goodsCoverImg":this.goods.thumb[0],
+            "goodsInfo":data.selectedSkuComb.goodsPropertyValue,
+            "goodsName":this.goods.title,
+            "goodsPropertyId":  data.selectedSkuComb.id,
+            "sellingPrice":data.selectedSkuComb.realPrice,
+            "goodsCount": data.selectedNum
+           
+       }
+       console.log("producntParams:"+JSON.stringify(params))
+       this.$router.push({path: '/order', query: {params: params,isSecond:this.isSecond}})
     },
     onAddCartClicked(data) {
+      //判断是否登录
+      if(this.$store.getters.token==undefined||this.$store.getters.token==null||this.$store.getters.token==''){
+         //没登录
+         this.$router.push("/login")
+         return
+       }
+
+      if(this.isSecond==true){
+         this.$toast("秒杀不能加入购物车")
+         return
+       }
       this.$toast(JSON.stringify(data));
       console.log("data:"+JSON.stringify(data))
+      let userId =this.$store.getters.userId;
       let params={
-         "goodsCount": 3,
-         "goodsCoverImg": "",
-         "goodsInfo": "[{\"key\":\"容量\",\"value\":\"1L\"}]",
-         "goodsName": "热卖电饭锅",
-         "goodsPrice": 200,
-         "goodsPropertyId": 1,
-         "userId": 4
+         "goodsCount":data.selectedNum ,
+         "goodsCoverImg": this.goods.thumb[0],
+         "goodsInfo": data.selectedSkuComb.goodsPropertyValue,
+         "goodsName": this.goods.title,
+         "goodsPrice": data.selectedSkuComb.realPrice,
+         "goodsPropertyId": data.selectedSkuComb.id,
+         "userId": userId
       }
-      // createShoppingCart(params).then(resp=>{
-      //      if(resp.code==200){
-      //       //  this.$router.push('/cart');
-      //       this.$toast("加入购物车成功")
-      //      }
-      //      else{
-      //        this.$toast("加入购物车失败");
-      //      }
-      // })
+       console.log("producntParams cart:"+JSON.stringify(params))
+      createShoppingCart(params).then(resp=>{
+           if(resp.code==200){
+            //  this.$router.push('/cart');
+            this.$toast("加入购物车成功")
+            //跳转到购物车页面
+             this.showBase=false;
+             
+            // this.$router.push("/cart")
+           }
+           else{
+             this.$toast("加入购物车失败");
+             this.showBase=false;
+           }
+      })
     },
     getProductDetail(){
        //获取goodId ,根据路由获得
@@ -291,7 +347,7 @@ export default {
           this.goods={
               title: this.product.goodsName,
               price: this.product.sellingPrice,
-              market_price:999,
+              market_price:this.product.originalPrice,
               express: '免运费',
               remain: 19,
               thumb: [
@@ -299,7 +355,7 @@ export default {
                   this.product.goodsCoverImg
                 // 'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
               ],
-              info:'<p style="text-align:center;"><img src="https://haitao.nosdn2.127.net/ac19460151ee4d95a6657202bcfc653c1531470912089jjjq8ml410763.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/2a91cfad22404e5498d347672b1440301531470912182jjjq8mnq10764.jpg" ></p><p style="text-align:center;"><img src="https://haitao.nos.netease.com/caddd5a213de4c1cb1347c267e8275731531470912412jjjq8mu410765.jpg" ></p>',
+              info:'<p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p><p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p><p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p>',
           }
           console.log("goods:"+JSON.stringify(this.goods))
           
@@ -314,12 +370,84 @@ export default {
                });
           });
 
-        
-
        })
       
     },
+    getSecondProductDetail(){
+      let flashId=this.$route.params.id
+      console.log("flashId:"+flashId)
+       selectById(flashId).then(resp=>{
+          //构造 goods,skuData
+          if(resp.data==null){
+                    console.log("获取flash失败")
+                    return
+           }
+          this.product = resp.data;
+          fetchProductList(this.product.goodsId).then(resp=>{
+          //构造 goods,skuData
+           if(resp.data==null){
+                    console.log("获取goodInfo失败")
+                    return
+           }
+          let data = resp.data;
+          this.goods={
+              title: data.goodsName,
+              price: this.product.sellingPrice,
+              market_price:this.product.price,
+              express: '免运费',
+              remain: 19,
+              thumb: [
+                  data.goodsCoverImg,
+                  data.goodsCoverImg
+                // 'https://img.yzcdn.cn/public_files/2017/10/24/1791ba14088f9c2be8c610d0a6cc0f93.jpeg'
+              ],
+              info:'<p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p><p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p><p style="text-align:center;"><img src="http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg" ></p>',
+          }
+          console.log("goods:"+JSON.stringify(this.goods))
+          
+          fetchSkuStockList(this.product.goodsId,{keyword:""}).then(response=>{
+             if(resp.data==null||resp.data.length==0){
+                    console.log("获取goodProperty失败")
+                    return
+              }
+              this.goodProperty=response.data;
+              console.log("goodProperty:"+JSON.stringify(this.goodProperty))
+              //把goodPropery中的秒杀价格
+              fetchSecondPropertyList(this.$route.params.id).then(resp=>{
+                  if(resp.data==null||resp.data.length==0){
+                    console.log("根据flashId获取相应的secondPropery")
+                    return
+                  }
+                  resp.data.forEach(item => {
+
+                      this.goodProperty.forEach(item1=>{
+                         if(item.goodsPropertyId==item1.goodsPropertyId){
+                            // console.log("item:"+JSON.stringify(item))
+                             item1.originalPrice=item.propertyPrice
+                             item1.sellingPrice=item.propertySellingPrice
+                             item1.selledStockNum=item.propertySelledCount
+                             item1.stockNum=item.propertyCount
+                            //  console.log("item1:"+JSON.stringify(item1))
+                         
+                         }
+                      })
+                  });
+                  console.log("change goodProperty:"+JSON.stringify(this.goodProperty))
+                  fetchProductAttrList(this.product.goodsId,{type:0}).then(response=>{
+                  this.goodPropertyRelate=response.data;
+                  console.log("goodPropertyRelate:"+JSON.stringify(this.goodPropertyRelate))
+                   this.getSkuData();
+                  });
+              })
+             
+          });
+
+       })
+          
+       })
+    },
     getSkuData(){
+
       console.log("enter sku data")
       let tree=this.getTree(this.goodPropertyRelate);
 
@@ -353,9 +481,8 @@ export default {
         is_virtual: '0',
         quota_used: 0,
         goods_info: {
-          title: '测试商品',
-          picture:
-            'https://img.yzcdn.cn/upload_files/2017/03/16/Fs_OMbSFPa183sBwvG_94llUYiLa.jpeg?imageView2/2/w/100/h/100/q/75/format/jpg',
+          title: '商品属性',
+          picture:this.goods.thumb[0],
           price: 1,
           origin: ''
         }
@@ -387,8 +514,9 @@ export default {
       let value={
         id: i,
         name: list[i],
-        imgUrl:
-        'https://img.yzcdn.cn/upload_files/2017/02/21/FjKTOxjVgnUuPmHJRdunvYky9OHP.jpg!100x100.jpg'
+        imgUrl:this.goods.thumb[0]
+        // imgUrl:
+        // 'https://img.yzcdn.cn/upload_files/2017/02/21/FjKTOxjVgnUuPmHJRdunvYky9OHP.jpg!100x100.jpg'
       }
       values.push(value)
     }
@@ -411,7 +539,10 @@ export default {
         }
         let single={
           id: propertys[i].goodsPropertyId,
-          price: propertys[i].sellingPrice,
+          //2021/4/15修改这里
+          goodsPropertyValue:propertys[i].goodsPropertyValue,
+          price: propertys[i].sellingPrice*100,
+          realPrice:propertys[i].sellingPrice,
           discount: 100,
           code: '',
           s1: s1,
