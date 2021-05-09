@@ -4,6 +4,7 @@ export default {
     productService:"/productService",
     orderService:"/orderService",
     activityService:"/activityService",
-    searchService:"/searchService"
+    searchService:"/searchService",
+    recommendService:"/recommendService"
     
 }

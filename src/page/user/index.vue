@@ -2,9 +2,21 @@
   <div>
     <div class="user-profile">
       <div class="user-profile-avatar">
-        <a href="/#/user/info">
+        <!-- <a href="/#/user/info">
           <img :src="data.Avatar" alt="用户头像">
-        </a>
+        </a> -->
+        <!-- <van-image width="100" height="100" src="https://img.yzcdn.cn/vant/cat.jpeg" /> -->
+        <!-- <van-image-preview
+        v-model="true"
+        images="https://img.yzcdn.cn/vant/cat.jpeg"
+        @change="onChange"
+        /> -->
+         <router-link to="/user/info">
+        <el-image
+      style="width: 100px; height: 100px"
+      src="https://img.yzcdn.cn/vant/cat.jpeg"
+      fit="fill"></el-image>
+         </router-link>
       </div>
       <div class="user-profile-username">
         <a href="/#/user/info">
@@ -47,14 +59,14 @@
             <div>已完成</div>
           </van-col>
         </router-link>
-        <router-link  to="/user/aftersale">
+        <!-- <router-link  to="/user/aftersale">
           <van-col span="6">
             <van-icon name="after-sale" >
               <van-info :info="data.AfterSaleTotal"   />
             </van-icon>
             <div>售后</div>
           </van-col>
-        </router-link>
+        </router-link> -->
       </van-row>
     </van-cell-group>
     
@@ -93,6 +105,7 @@
 import { GetUserIndex } from "../../api/user.js";
 import { Message } from 'element-ui';
 import getters from '@/store/getters'
+// import {Image as VanImage } from 'vant'
 export default {
   data(){
     return{
@@ -100,6 +113,7 @@ export default {
     }
   },
   components: {
+    
   },
   created:function(){
         // Message.info("process.env.BASE_API:"+process.env.BASE_API)

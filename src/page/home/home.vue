@@ -19,7 +19,9 @@ import GoodList from './components/GoodList.vue';
 import BannerSwiper from './components/BannerSwiper.vue';
 import QuickLinkNav from './components/QuickLinkNav.vue';
 import CustomColumn from './components/CustomColumn.vue';
- import {fetchListWithChildren} from '@/api/productCate'
+import {fetchList as fetchProduct} from '@/api/product'
+import {fetchList as fetchRecommend} from '@/api/recommend'
+import {fetchListWithChildren} from '@/api/productCate'
 export default {
     name:"home",
     components:{
@@ -81,14 +83,51 @@ export default {
           
         },
         getRecommed(){
-          this.goodslist=[
-              {id:1,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"},
-              {id:2,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"},
-              {id:3,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"},
-              {id:4,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"},
-              {id:5,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"},
-              {id:6,src:"http://mall-photo.oss-cn-beijing.aliyuncs.com/dianfangguo1.jpg",title:"电饭锅",price:"12.5"}
-          ]
+            let list=[
+                {id:7,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%854.jpg",title:"电饭煲家用4L多功能智能大容量迷你电饭锅煮饭官方旗舰店正品",price:"1764.00"},
+                {id:8,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%855.jpg",title:"电饭煲家用3L升多功能迷你小型电饭锅1-2人智能4官方旗舰正品",price:"5065.00"},
+                {id:9,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%851.jpg",title:"智能家用电饭煲4L升电饭锅蛋糕多功能全自动2人正品煮饭E503",price:"8830.00"},
+                {id:10,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%852.jpg",title:"电饭煲C1小米电饭煲家用大容量电饭锅3-4人多功能自动",price:"3355.00"},
+                {id:11,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%853.jpg",title:"电饭煲家用小型1人-2人多功能智能电饭锅3-4人官方旗舰店",price:"8718.00 "},
+                {id:12,src:"https://mall-photo.oss-cn-beijing.aliyuncs.com/%E7%94%B5%E9%A5%AD%E9%94%854.jpg",title:"电饭煲5L智能大容量家用3人多功能电饭锅4L正品官方旗舰店",price:"2132.00"}
+            ]
+           if(this.$store.getters.token==null||this.$store.getters.token==""){
+             //直接从后端读取数据渲染
+              this.goodslist=list
+               return;
+           }
+           let params={
+                size:6,
+                recommendType:"userBased"
+           }
+           fetchRecommend(this.$store.getters.userId,params).then(resp=>{
+             if(resp.data==null|| resp.data.length==0){
+               //没有推荐的商品,从正常数据库中读取数据库
+               this.goodslist=list;
+               return;
+             }
+             this.goodslist=[]
+             resp.data.forEach(item => {
+                let value={
+                  id:item.goodsId,
+                  src:item.goodsCoverImg,
+                  title:item.goodsName,
+                  price:item.sellingPrice
+                }
+                this.goodslist.push(value)
+             });
+            if(this.goodslist.length<6){
+              //从后端获取商品补充不足
+              let length= this.goodslist.length
+              for(let i =0;i<6-length;i++){
+
+               
+                  this.goodslist.push(list[i]);
+              }
+            }
+            
+           })
+         
         }
     }
 };

@@ -252,7 +252,7 @@ export default {
       let couponHistoryId = this.seletedCoupon==null?null:this.seletedCoupon.couponHistoryId
       console.log("commit paystatus:"+payStatus)
       this.confirmOrder.payStatus=payStatus
-      this.confirmOrder.payType=0
+      this.confirmOrder.payType=payStatus
       this.confirmOrder.payTime=new Date()
       this.confirmOrder.orderStatus=payStatus
       this.confirmOrder.orderAddressId=this.userAddress.addressId
@@ -295,7 +295,7 @@ export default {
               let value={
                   imageURL:data[i].goodsCoverImg,
                   title: data[i].goodsName,
-                  desc: data[i].goodsInfo,
+                  desc: this.formateGoodInfo(data[i].goodsInfo),
                   price: data[i].sellingPrice,
                   quantity: data[i].goodsCount
               }
@@ -323,7 +323,7 @@ export default {
                   //      "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
                    imageURL:data[i].goodsCoverImg,
                   title: data[i].goodsName,
-                  desc: data[i].goodsInfo,
+                  desc:  this.formateGoodInfo(data[i].goodsInfo),
                   price: data[i].sellingPrice,
                   quantity: data[i].goodsCount
               }
@@ -351,7 +351,7 @@ export default {
                   //      "https://img10.360buyimg.com/mobilecms/s88x88_jfs/t17572/12/840082281/351445/e1828c58/5aab8dbbNedb77d88.jpg",
                    imageURL:data[i].goodsCoverImg,
                   title: data[i].goodsName,
-                  desc: data[i].goodsInfo,
+                  desc:  this.formateGoodInfo(data[i].goodsInfo),
                   price: data[i].sellingPrice,
                   quantity: data[i].goodsCount
               }
@@ -472,6 +472,21 @@ export default {
        console.log("onClick")
        this.seletedCoupon=row;
        this.popupShow=false
+    },
+    formateGoodInfo(goodInfo){
+      goodInfo = JSON.parse(goodInfo)
+      console.log("goodInfo:"+JSON.stringify(goodInfo))
+      if(goodInfo!=null&&goodInfo.length>0){
+         let name=""
+         goodInfo.forEach(item=>{
+           name = name + item.key+":"+item.value+" "
+         })
+        console.log("name:"+name)
+        return name
+      }else{
+        return ""
+      }
+       
     }
     
   },

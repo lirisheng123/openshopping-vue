@@ -24,6 +24,9 @@
     </swiper-slide>
     <!-- Optional controls -->
     <div class="swiper-pagination" slot="pagination"></div>
+     <!-- <div class="swiper-button-prev" slot="button-prev"></div>
+            <div class="swiper-button-next" slot="button-next"></div>
+            <div class="swiper-scrollbar"   slot="scrollbar"></div> -->
   </swiper>
 </template>
 
@@ -44,68 +47,70 @@ export default {
     },
     data(){  
         return{
-            topheight:0,
-            page:{},
-            banners:null,
-            quicknavlist:null,
-            customs:null,
-            goodslist:null,
+            // topheight:0,
+            // page:{},
+            // banners:null,
+            // quicknavlist:null,
+            // customs:null,
+            // goodslist:null,
             swiperOption: {  
-          notNextTick: true,
-          //循环
-          loop:true,
-          //设定初始化时slide的索引
-          initialSlide:0,
-          //自动播放
-          autoplay:true,
-          // autoplay: {
-          //     delay: 3000,
-          //     stopOnLastSlide: false,
-          //     disableOnInteraction: true,
-          // },
-          // 设置轮播
-          effect : 'flip',
-          //滑动速度
-          speed:800,
-          //滑动方向
-          direction : 'horizontal',
-          //小手掌抓取滑动
-          // grabCursor : true,
-          //滑动之后回调函数
-          on: {
-              slideChangeTransitionEnd: function(){
-                // console.log(this.activeIndex);//切换结束时，告诉我现在是第几个slide
+              // notNextTick: true,
+              //循环
+              loop:true,
+              //设定初始化时slide的索引
+              // initialSlide:0,
+              //自动播放
+              autoplay:true,
+              // autoplay: {
+              //     delay: 3000,
+              //     stopOnLastSlide: false,
+              //     disableOnInteraction: true,
+              // },
+              // 设置轮播
+              // effect : 'flip',
+              //滑动速度
+              speed:800,
+              //滑动方向
+              direction : 'horizontal',
+             // 小手掌抓取滑动
+              grabCursor : true,
+              //滑动之后回调函数
+              // on: {
+              //     slideChangeTransitionEnd: function(){
+              //       // console.log(this.activeIndex);//切换结束时，告诉我现在是第几个slide
+              //     },
+              // },
+              //左右点击
+              navigation: {
+                  nextEl: '.swiper-button-next',
+                  prevEl: '.swiper-button-prev',
               },
-          },
-          //左右点击
-          navigation: {
-              nextEl: '.swiper-button-next',
-              prevEl: '.swiper-button-prev',
-          },
-          //分页器设置         
-          pagination: {
-              el: '.swiper-pagination',
-              clickable :true
-          }
+              //分页器设置         
+              pagination: {
+                  el: '.swiper-pagination',
+                  clickable :true
+              }
+             
             },
-            swiperSlides: [1, 2, 3, 4]
-            }
+            // swiperSlides: [1, 2, 3, 4]
+           
+        }
+       
     },
     created(){
      
         
     },
-  computed: {  
-    swiper() {  
-      return this.$refs.banner-swiper.swiper;  
-    }  
-  }, 
-  
-  mounted () {  
-    //可以使用swiper这个对象去使用swiper官网中的那些方法  
-     console.log('this is current swiper instance object', this.swiper);
-      // this.swiper.slideTo(0, 0, false);
-  }  ,
+    computed: {  
+      swiper() {  
+        return this.$refs.banner-swiper.swiper;  
+      }  
+    }, 
+    mounted () {  
+      //可以使用swiper这个对象去使用swiper官网中的那些方法  
+      console.log('this is current swiper instance object', this.swiper);
+        // this.swiper.slideTo(0, 0, false);
+    },
     methods:{
         settopheight:function(value){
             this.topheight=value;
@@ -116,21 +121,7 @@ export default {
 </script>
 
 <style lang="less">
-  /* .el-carousel__item h3 {
-    color: #475669;
-    font-size: 14px;
-    opacity: 0.75;
-    line-height: 150px;
-    margin: 0;
-  }
-
-  .el-carousel__item:nth-child(2n) {
-     background-color: #99a9bf;
-  }
   
-  .el-carousel__item:nth-child(2n+1) {
-     background-color: #d3dce6;
-  } */
   .banner-swiper {
   height: 264px;
   background: #f5f5f5;

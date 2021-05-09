@@ -16,6 +16,8 @@ import {
   GoodsActionBigBtn,
   GoodsActionMiniBtn,
   Actionsheet,
+  ImagePreview,
+  Image ,
   Sku,
   Card,Button,SwipeCell,Dialog,Tab, Tabs,Row,Checkbox, CheckboxGroup, SubmitBar,NavBar,Tabbar, TabbarItem,Panel,List,Step, Steps,Field ,
   Badge, BadgeGroup,Popup,Stepper,RadioGroup, Radio,Picker,Uploader,Info
@@ -37,6 +39,8 @@ const components=[
     Sku,
     Card,
     Button,
+    ImagePreview,
+    
     SwipeCell ,
     Dialog ,
     headerNav, 

@@ -283,7 +283,7 @@ export default {
        }
 
     
-      this.$toast(JSON.stringify(data));
+      // this.$toast(JSON.stringify(data));
        //携带着商品信息跳转到订单页面
        let params = {
          	
@@ -310,7 +310,7 @@ export default {
          this.$toast("秒杀不能加入购物车")
          return
        }
-      this.$toast(JSON.stringify(data));
+      // this.$toast(JSON.stringify(data));
       console.log("data:"+JSON.stringify(data))
       let userId =this.$store.getters.userId;
       let params={

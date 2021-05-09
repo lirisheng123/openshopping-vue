@@ -4,24 +4,28 @@
     padding: 130px 0 0;
     margin: 15px 0;"></div>
     <div style="margin:0 10px;font-size: 14px;">
-        <router-link to="/login/phone">
+        <!-- <router-link to="/login/phone">
             <van-button  size="large" style="font-size: 14px;height: 42px;line-height: 42px;margin-bottom: 15px;">手机号登录</van-button>
-        </router-link>
+        </router-link> -->
         <router-link to="/login/password">
             <van-button  size="large" style="font-size: 14px;height: 42px;line-height: 42px;margin-bottom: 15px;">密码登录</van-button>
         </router-link>
-        <router-link to="/login/register">
-            <van-button  size="large" type="primary" style="font-size: 14px;height: 42px;line-height: 42px;">手机号一键注册</van-button>
+      
+         <router-link to="/login/passowrdRegister">
+            <van-button  size="large" type="primary" style="font-size: 14px;height: 42px;line-height: 42px;">注册</van-button>
         </router-link>
+        <!-- <router-link to="/login/register">
+            <van-button  size="large" type="primary" style="font-size: 14px;height: 42px;line-height: 42px;">手机号一键注册</van-button>
+        </router-link> -->
         
     </div>
-    <div class="m-thirdpart">
+    <!-- <div class="m-thirdpart">
         <p class="tit"><span class="txt">或用以下方式登录</span></p>
         <div class="lnk">
             <van-icon name="wechat" color="#1AAD16" />
             <van-icon name="alipay" color="#7dcbeb"/>
         </div>
-    </div>  
+    </div>   -->
    </div>
 </template>
 

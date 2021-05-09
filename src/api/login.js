@@ -47,6 +47,14 @@ export function logout() {
   })
 }
 
+export function registerUser(data){
+  return request({
+    url: prefixName.userService+'/user/register',
+    method: 'post',
+    data: data
+  })
+}
+
 export function fetchList(params) {
   return request({
     url: '/admin/list',

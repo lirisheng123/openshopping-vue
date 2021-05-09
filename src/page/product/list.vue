@@ -426,7 +426,8 @@ export default {
                let product={
                  id: list[i].goodsId,
                  imageURL: list[i].goodsCoverImg,
-                 title: list[i].goodsName,
+                 desc: this.formateGoodInfo(list[i].attrValueList),
+                 title: list[i].grandName+list[i].goodsName,
                  price: list[i].sellingPrice
                }
                this.products.push(product)
@@ -444,6 +445,18 @@ export default {
            
        })
 
+    },
+    formateGoodInfo(goodInfo){
+       if(goodInfo==null||goodInfo.length==0){
+         return ""
+       }
+       let name=""
+       goodInfo.forEach(item=>{
+          name = name + item.goodsParamValue+":"+item.goodsParamName+" "
+       })
+       console.log("name:"+name)
+       return name;
+     
     },
     onSearch() {
       this.page=1;

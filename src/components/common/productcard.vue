@@ -74,6 +74,8 @@ export default {
         margin-right: 5px;
     }
     .price {
+          
+      height: 22px;
       color: #e93b3d;
       font-size: 10px;
         overflow: hidden;
@@ -113,4 +115,6 @@ export default {
     border-color: #f7f7f7;
 
 }
+
+
 </style>

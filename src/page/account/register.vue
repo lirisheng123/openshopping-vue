@@ -10,10 +10,10 @@
                  <van-field
                     center
                     clearable
-                    placeholder="请输入短信验证码"
-                >
+                    placeholder="请输入短信验证码">
+               
                     <van-button slot="button" size="small" type="primary">发送验证码</van-button>
-                </van-field>
+                </van-field> 
                 <van-field
                     type="password"
                     placeholder="请输入密码"

@@ -52,6 +52,13 @@ const routes = [
     }
   },
   {
+		path: '/login/passowrdRegister',
+    component: () => import('../page/account/passowrdRegister'),
+    meta: {
+      title: '密码注册'
+    }
+  },
+  {
 		path: '/login/register',
     component: () => import('../page/account/register'),
     meta: {
@@ -72,6 +79,14 @@ const routes = [
     name: 'user',
     meta: {
       title: '账号管理'
+    }
+  },
+  {
+		path: '/user/info/changepassword',
+    component: () => import('../page/user/info/component/updatePassword'),
+    name: 'user',
+    meta: {
+      title: '修改密码'
     }
   },
   {

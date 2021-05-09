@@ -216,7 +216,7 @@ export default {
             let value={
                 id: data[i].cartItemId,
                 title:  data[i].goodsName,
-                desc: data[i].goodsInfo,
+                desc: this.formateGoodInfo(data[i].goodsInfo),
                 price: data[i].goodsPrice,
                 quantity:data[i].goodsCount,
                 imageURL:data[i].goodsCoverImg,
@@ -226,6 +226,21 @@ export default {
             this.goods.push(value)
           }
        })
+    },
+    formateGoodInfo(goodInfo){
+      goodInfo = JSON.parse(goodInfo)
+      console.log("goodInfo:"+JSON.stringify(goodInfo))
+      if(goodInfo!=null&&goodInfo.length>0){
+         let name=""
+         goodInfo.forEach(item=>{
+           name = name + item.key+":"+item.value+" "
+         })
+        console.log("name:"+name)
+        return name
+      }else{
+        return ""
+      }
+       
     },
     editClick(){
       this.isEidt=!this.isEidt
